@@ -122,44 +122,7 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
 					try {
 						ctrlDlg.setMapContext(map);
 						PluginServices.getMDIManager().addWindow(ctrlDlg);
-// TODO: Remover o código daqui para a frente
-						if (ctrlDlg.isOkPressed()) {
-							if (net.getLayer().getISpatialIndex() == null)
-							{
-								System.out.println("Calculando índice espacial (QuadTree, que es más rápido)...");
-								net.getLayer().setISpatialIndex(
-										NetworkUtils.createJtsQuadtree(net.getLayer()));
-								System.out.println("Indice espacial calculado.");
-							}
-							FLyrVect layerOrigins = ctrlDlg.getOriginsLayer();
-//							FLyrVect layerDestinations = ctrlDlg.getDestinationsLayer();
-//							boolean bSameLayer = false;
-//							if (layerOrigins == layerDestinations)
-//								bSameLayer = true;
-							double tolerance = ctrlDlg.getTolerance();
-							GvFlag[] originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins,
-									net, tolerance);
-							GvFlag[] destinationFlags = null; 
-//							if (bSameLayer)
-								destinationFlags = originFlags;
-//							else
-//								destinationFlags = NetworkUtils.putFlagsOnNetwork(layerDestinations, net, tolerance);
-							
-							File selectedFile = new File(ctrlDlg.getFileAddress());
-							
-							
-							selectedWriter = odMatrixWriters.get(ctrlDlg.getFileFormat());
-							
-							ODMatrixTask task = new ODMatrixTask(net, originFlags, destinationFlags,
-									selectedFile, selectedWriter);
-							PluginServices.cancelableBackgroundExecution(task);
-							// calculateOdMatrix(net, originFlags, destinationFlags, selectedFile);
-							
-							// TODO: ASK THE USER IF HE WANTS TO SAVE FLAGS TO AVOID PUTTING POINTS
-							// ON NETWORK AGAIN
-							
-							return;
-						} // isOkPressed
+
 					} catch (BaseException e) {
 						e.printStackTrace();
 						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
@@ -167,12 +130,9 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
 //							NotificationManager.addError(e.getFormatString(), e);
 						}
 					}
-
 				}
 			} 
 		}
-		
-
 	}
 	
 	public boolean isEnabled() {
