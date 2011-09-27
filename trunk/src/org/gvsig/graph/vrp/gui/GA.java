@@ -19,7 +19,6 @@ public class GA {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabGA;
-	private GeneList geneList;
 	private GAParameters params;
 	private ButtonGroup buttonGroup;
 	
@@ -57,7 +56,7 @@ public class GA {
 		rdbtnUserSelectedadvanced.setBounds(228, 17, 191, 23);
 		panel.add(rdbtnUserSelectedadvanced);
 		
-		JButton btnNextTab3 = new JButton("Next >>");
+		JButton btnNextTab3 = new JButton("Run! >>");
 		btnNextTab3.setBounds(386, 278, 89, 23);
 		btnNextTab3.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -80,11 +79,11 @@ public class GA {
 	
 	// Generate an object with the desired GA parameters
 	public GAParameters generateGAParameters(){
-		int popSize = 50;
+		int popSize=1000;
         float elitism=0.1f;
         float mutationProb=0.2f;
         float crossoverProb=0.8f;
-        int generations=40;
+        int generations=100;
 		
         // Generate an object with the desired parameters
         return new GAParameters(popSize, elitism, mutationProb, crossoverProb, generations);
@@ -97,11 +96,17 @@ public class GA {
 		// Create an object with the GA parameters
 		params = generateGAParameters();
 		
-		controlPanel.switchToNextTab();
+		// Get the list of genes from the Vehicles class
+		GeneList geneList = controlPanel.getVehicles().getGeneList();
+		
+		// Get the cost matrix from the ODMatrix class
+		CostMatrix costMatrix = controlPanel.getODMatrix().getCostMatrix();
 		
         // Run the genetic algorithm
-		
-        VRPGARun run = new VRPGARun(params, geneList, controlPanel.getODMatrix().getCostMatrix());
+		Run run = controlPanel.getRun();	// Get the run object
+        run.setVRPGARun(new VRPGARun(params, geneList, costMatrix));	// Create the object with all we need
+        controlPanel.switchToNextTab();		// Switch to the Run tab
+        run.go();	// Can go! Can run the GA!
 	}
 	
 	// Just go to the previous tab

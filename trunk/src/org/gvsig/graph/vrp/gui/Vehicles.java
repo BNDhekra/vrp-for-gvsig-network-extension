@@ -19,6 +19,7 @@ import org.metavrp.VRP.*;
 public class Vehicles {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
+	private GeneList geneList;
 	private JPanel tabVehicles;
 	private JTextField nVehicles;
 	private JComboBox depot;
@@ -107,7 +108,7 @@ public class Vehicles {
 		// Create an ArrayList of the vehicles.
 		ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>(); 
 		for (int i=1; i<=getNumVehicles(); i++){
-			vehicles.add(new Vehicle(i, getDepotNumber()));
+			vehicles.add(new Vehicle(-i, getDepotNumber()));
 		}
 		return new GeneList(customers, vehicles);
 	}
@@ -123,6 +124,11 @@ public class Vehicles {
 	// Get the number of vehicles
 	public int getNumVehicles() {
 		return numVehicles;
+	}
+	
+	// Get the list of genes (vehicles and customers)
+	public GeneList getGeneList(){
+		return this.geneList;
 	}
 
 	
@@ -146,7 +152,7 @@ public class Vehicles {
 		}
 
 		// Create an object with the list of genes (vehicles and customers) to use on the Genetic Algorithm
-		createGeneList();
+		this.geneList = createGeneList();
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();

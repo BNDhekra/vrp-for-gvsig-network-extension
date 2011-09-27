@@ -119,6 +119,7 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		// Fourth tab: Run the GA
 		run = new Run(this);
 		tabRun = run.initTab();
+//		run.run();	// Prepare the thread to run when the problem is correctly defined 
 		tabs.addTab("Run", null, tabRun, null);
 
 		// Fifth tab: Best Results
@@ -140,16 +141,12 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		tabs.setEnabledAt(4, false);
 	}
 
-	private void closeWindow() {
+	public void closeWindow() {
 		if (PluginServices.getMainFrame() != null) {
 			PluginServices.getMDIManager().closeWindow(this);
 		}
 	}
 
-	
-//	private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {
-//		closeWindow();
-//	}
 	
 	/**
 	 * @return Returns the okPressed.
@@ -211,7 +208,21 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	public Vehicles getVehicles(){
 		return vehicles;
 	}
-
+	
+	// Returns the GA object
+	public GA getGA(){
+		return ga;
+	}
+	
+	// Returns the Run object
+	public Run getRun(){
+		return run;
+	}
+	
+	// Returns the Results object
+	public Results getResults(){
+		return results;
+	}
 	
 	// Switch to the next tab and hide the one before
 	public void switchToNextTab(){

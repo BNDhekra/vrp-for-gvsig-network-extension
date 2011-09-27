@@ -325,14 +325,15 @@ public class ODMatrix extends JPanel {
 	private void btnNextODMatrixActionPerformed(java.awt.event.ActionEvent evt) {
 
 		// Try to get the tolerance
-		tolerance = getTolerance();					
+		tolerance = getTolerance();			
+		
+		// Get the file's address
+		selectedFile = new File(getFileAddress());
 		
 		// If the user wants to create a new ODMatrix file, do it, otherwise open an existing one
 		if (opt2.isSelected()){
 			// Verify that the file exists and can be written
-			selectedFile = new File(getFileAddress());
-			if (!canWriteFile(selectedFile))			// Can the file be written? If no, show an alert
-			{	
+			if (!canWriteFile(selectedFile)){			// Can the file be written? If no, show an alert
 				controlPanel.showMessageDialog("Please_select_a_valid_file");
 				return;
 			}
@@ -349,13 +350,14 @@ public class ODMatrix extends JPanel {
 				if (!generateODMatrixFile(false)){	// Execute only if the ODMatrix file was correctly generated 
 					controlPanel.showMessageDialog("Please_select_a_valid_file");
 					return;
-				} ;
+				}
 			}
 		}
 		else if (opt1.isSelected()){				// Open previously generated ODMatrix
-			if (!openODMatrixFile())
+			if (!openODMatrixFile()){
 				controlPanel.showMessageDialog("Please_select_a_valid_file"); 
 				return;
+			}
 		}
 		
 		// Create the Distance Matrix
@@ -453,11 +455,11 @@ public class ODMatrix extends JPanel {
 	
 	// Open existing ODMatrix file
 	public boolean openODMatrixFile(){
-		if (!selectedFile.exists()){
+		if (!selectedFile.exists()){	// If the file doesn't exist
 			controlPanel.showMessageDialog("File_doesnt_exist");
 			return false;
 		}
-		if (!selectedFile.canRead()){
+		if (!selectedFile.canRead()){	// If the file can't be read
 			controlPanel.showMessageDialog("File_cannot_be_read");
 			return false;
 		}
