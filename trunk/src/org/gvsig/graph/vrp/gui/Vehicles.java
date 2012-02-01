@@ -10,6 +10,8 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+
+import org.gvsig.graph.vrp.support.Nodes;
 import org.metavrp.GA.*;
 import org.metavrp.GA.support.*;
 import org.metavrp.VRP.*;
@@ -20,12 +22,13 @@ public class Vehicles {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private GeneList geneList;
+	private Nodes nodes;
 	private JPanel tabVehicles;
 	private JTextField nVehicles;
 	private JComboBox depot;
 	private int depotNumber;
 	private int numVehicles;
-	
+		
 	// Constructor.
 	// Just initializes the Control Panel on witch this JPanel will be drawn.
 	public Vehicles(VRPControlPanel controlPanel) {
@@ -94,24 +97,44 @@ public class Vehicles {
 		depot.setSelectedIndex(0);
 	}
 	
-	// Create the list of possible genes (vehicles and customers)
-	public GeneList createGeneList(){
+	// Create the list of possible genes (vehicles and customers) 
+	// At the same time create the list of nodes.
+	public void createGeneListAndNodes(){
+		// Initialize the nodes
+		nodes = new Nodes(controlPanel);
+		
 		// Create an ArrayList of the customers.
 		// The customers are all the nodes except the depot 
 		ArrayList<Customer> customers = new ArrayList<Customer>(); 
-		for (int i=0; i<controlPanel.getODMatrix().getCostMatrixSize(); i++){
-			// Add all the nodes to the customers list except the depot
-			if (i != getDepotNumber())
-				customers.add(new Customer(i,i));	
-		}
-		
 		// Create an ArrayList of the vehicles.
 		ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>(); 
-		for (int i=1; i<=getNumVehicles(); i++){
-			vehicles.add(new Vehicle(-i, getDepotNumber()));
+		for (int i=0; i<controlPanel.getODMatrix().getCostMatrixSize(); i++){
+			Nodes.Node node = nodes.new Node();
+			// Add all the nodes to the customers list except the depot
+			if (i != getDepotNumber()){
+				Customer customer = new Customer(i,i);
+				customers.add(customer);
+				node.setGene(customer);
+				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
+			} else {
+				for (int j=1; j<=getNumVehicles(); j++){
+					vehicles.add(new Vehicle(-j, getDepotNumber()));
+				}
+				
+				// Add the depot
+				// Temporarily the depot will be a vehicle with the first index Integer.MIN_VALUE and the second the depot number 
+				// TODO: Change this to accommodate depots natively on the representation of the chromosome (in metaVRP).
+				Vehicle depot = new Vehicle(Integer.MIN_VALUE,getDepotNumber()); 
+				node.setGene(depot);
+				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
+			}
+			nodes.addNode(node);
 		}
-		return new GeneList(customers, vehicles);
+		
+		// The list of genes is now initialized
+		geneList = new GeneList(customers, vehicles);
 	}
+	
 	
 	/*
 	 * Getters and Setters
@@ -130,7 +153,6 @@ public class Vehicles {
 	public GeneList getGeneList(){
 		return this.geneList;
 	}
-
 	
 	// Get the variables (vehicles and depot) 
 	private void btnNextVehiclesActionPerformed(){
@@ -152,7 +174,8 @@ public class Vehicles {
 		}
 
 		// Create an object with the list of genes (vehicles and customers) to use on the Genetic Algorithm
-		this.geneList = createGeneList();
+		// The customers and depot need to go to the Nodes too
+		controlPanel.setNodes(nodes);
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();

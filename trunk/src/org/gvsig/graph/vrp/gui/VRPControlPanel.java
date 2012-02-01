@@ -13,6 +13,9 @@ import javax.swing.*;
 
 import org.gvsig.exceptions.BaseException;
 import org.gvsig.graph.IODMatrixFileWriter;
+import org.gvsig.graph.core.Network;
+import org.gvsig.graph.vrp.support.Costs;
+import org.gvsig.graph.vrp.support.Nodes;
 
 import com.iver.andami.PluginServices;
 import com.iver.andami.ui.mdiManager.IWindow;
@@ -34,7 +37,10 @@ public class VRPControlPanel extends JPanel implements IWindow {
 
 	private MapContext mapContext;
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
+	private Network network;
 	private WindowInfo wi;
+	private Nodes nodes;
+	private Costs costs;
 	
 	// TODO: Remove this?
 	private boolean btnNext1Pressed = false;
@@ -85,8 +91,9 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	}
 
 	/** Creates new form OdMatrixControlPanel */
-	public VRPControlPanel(ArrayList<IODMatrixFileWriter> odMatrixWriters) {
+	public VRPControlPanel(ArrayList<IODMatrixFileWriter> odMatrixWriters, Network net) {
 		this.odMatrixWriters=odMatrixWriters;
+		this.network=net;
 		initComponents();
 	}
 
@@ -187,7 +194,9 @@ public class VRPControlPanel extends JPanel implements IWindow {
 
 	public WindowInfo getWindowInfo() {
 		if (wi == null) {
-			wi = new WindowInfo(WindowInfo.MODALDIALOG);
+//			wi = new WindowInfo(WindowInfo.MODALDIALOG);
+//			wi = new WindowInfo(WindowInfo.MODELESSDIALOG);
+			wi = new WindowInfo(WindowInfo.PALETTE);
 			wi.setWidth((int) this.getPreferredSize().getWidth());
 			wi.setHeight((int) this.getPreferredSize().getHeight());
 			wi.setTitle(_T("vrp_control_panel"));
@@ -199,6 +208,24 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		return WindowInfo.DIALOG_PROFILE;
 	}
 	
+	
+	public Network getNetwork() {
+		return network;
+	}
+	
+	public Nodes getNodes() {
+		return nodes;
+	}
+	public void setNodes(Nodes nodes) {
+		this.nodes = nodes;
+	}
+	public Costs getCosts() {
+		return costs;
+	}
+	public void setCosts(Costs costs) {
+		this.costs = costs;
+	}
+
 	// Returns the ODMatrix object
 	public ODMatrix getODMatrix(){
 		return odmatrix;

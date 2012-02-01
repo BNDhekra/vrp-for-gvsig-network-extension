@@ -92,6 +92,8 @@ public class GA {
 	
 	// Get the GA options and run the GA with them
 	private void btnNextGAActionPerformed(){
+		// Insist that the button has the text "Run!"
+		controlPanel.getRun().btnNextTab4.setText("Stop!");
 		
 		// Create an object with the GA parameters
 		params = generateGAParameters();

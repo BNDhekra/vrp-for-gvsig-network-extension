@@ -18,11 +18,14 @@ public class Run implements Runnable{
 	
 	private VRPControlPanel controlPanel;	// The VRP Control Panel that called this object
 	private JPanel tabRun;
-	private JButton btnNextTab4;			// The button "Stop!" and "Next >>"
+	public JButton btnNextTab4;			// The button "Stop!" and "Next >>"
 	
 	private VRPGARun run;					// The Runnable Genetic Algorithm
 	private Thread vrpThread;				// The thread that runs the Genetic Algorithm
 	private Thread statsThread;				// The thread that updates the statistics 
+	
+	private double initialBestElementCost;	// The cost of the best individual of the initial (randomly generated) population 
+	private Population vrpLastPopulation;	// The last population
 
 	// The labels with some statistics
 	private JLabel generationLabel, bestLabel, averageLabel, worstLabel;
@@ -163,7 +166,7 @@ public class Run implements Runnable{
 	            	updateGraphic();	// Update the graphic
 
 	            	wait(200);			// Wait 200ms
-	            	if (!isRunning()) btnStopToNext();	// If the run ends, change the button from "Stop!" to "Next >>"
+	            	if (!isRunning()) btnNextTab4.setText("Next >>");	// If the run ends, change the button from "Stop!" to "Next >>"
 	        	}
 	        	catch(InterruptedException e){
 	        		e.printStackTrace();
@@ -195,20 +198,30 @@ public class Run implements Runnable{
 		}
 		else return false;	// The thread isn't running
 	}
-	
-	// Change the button's label from "Stop!" to "Next >>"
-	public void btnStopToNext(){
-		btnNextTab4.setText("Next >>");
-	}
+
 	
 	// Stops the metaVRP thread and goes to the next tab
 	private void btnNextRunActionPerformed(){
 		// If the Genetic Algorithm is running, stop it.
 		// TODO: change vrpThread.stop() to a boolean variable that set's the runnable's run method to stop execution.
 		// TODO: Show alert message if the user is sure to stop the thread.
-		if (isRunning()) vrpThread.stop();
-		// Otherwise go to the next tab.
-		else controlPanel.switchToNextTab();
+		
+		// First get the cost (fitness) of the best individual of the first (randomly generated) population
+		initialBestElementCost = run.getFirstPopulation().getTop(1)[0].getFitness();
+
+		// Then get the last population
+    	vrpLastPopulation = run.getPopulation();
+		
+		if (isRunning()){
+			// Stop the thread
+			vrpThread.stop();
+			statsThread.stop();
+			btnNextTab4.setText("Next >>");			// Change the button's text to "Next >>"
+		} else {	// Otherwise go to the next tab.
+			Results results = controlPanel.getResults();
+			results.generateRowData();	// Refresh the list of results
+			controlPanel.switchToNextTab();
+		}
 	}
 
 	// Just go to the previous tab
@@ -228,4 +241,20 @@ public class Run implements Runnable{
 	public Thread getStatsThread(){
 		return statsThread;
 	}
+
+	// Returns the cost of the best element of the initial (randomly generated) population
+	public double getInitialBestElementCost() {
+		return initialBestElementCost;
+	}
+
+	// Returns the current Population
+	public Population getVrpCurrentPopulation() {
+		return run.getPopulation();
+	}
+	
+	// Returns the last Population
+	public Population getVrpLastPopulation() {
+		return vrpLastPopulation;
+	}
+	
 }

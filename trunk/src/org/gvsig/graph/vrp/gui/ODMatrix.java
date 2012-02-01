@@ -22,6 +22,8 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingConstants;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+
+import org.apache.log4j.Logger;
 import org.gvsig.exceptions.BaseException;
 import org.gvsig.fmap.util.LayerListCellRenderer;
 import org.gvsig.graph.core.GraphException;
@@ -31,12 +33,22 @@ import org.gvsig.graph.core.Network;
 import org.gvsig.graph.core.NetworkUtils;
 import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.gui.ODMatrixTask;
+import org.gvsig.graph.vrp.VRPExtension;
+
 import com.iver.andami.PluginServices;
 import com.iver.cit.gvsig.fmap.MapContext;
+import com.iver.cit.gvsig.fmap.core.IFeature;
+import com.iver.cit.gvsig.fmap.drivers.IFeatureIterator;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
+import com.iver.cit.gvsig.fmap.layers.ReadableVectorial;
 import com.iver.cit.gvsig.fmap.layers.SingleLayerIterator;
 import com.iver.cit.gvsig.fmap.layers.FLayer;
 import com.iver.cit.gvsig.project.documents.view.gui.View;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
+
 import org.metavrp.VRP.*;
 
 // TODO: description of class
@@ -46,6 +58,8 @@ public class ODMatrix extends JPanel {
 	private static IODMatrixFileWriter selectedWriter;	// The kind of file to write (there are 3 types)
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
 	private DefaultComboBoxModel cboLayerOriginsModel;
+	private FLyrVect layerOrigins;
+	private GvFlag[] originFlags;
 	private JComboBox cboLayerOrigins;
 	private JLabel jLblLayerOrigins;
 	private JPanel layerJPanel;
@@ -65,9 +79,13 @@ public class ODMatrix extends JPanel {
 	private JButton btnNextTab1;
 	private JPanel tabLayers;
 	private FileInputStream fstream;
-	private double tolerance=100;
+	private double maxTolerance=100000;
 	private CostMatrix costMatrix;
 	private int costMatrixSize;
+	private boolean flagsOnNet=false;
+	
+	static Logger logger = Logger.getLogger(NetworkUtils.class);
+	
 	
 	// Constructor.
 	// Just initializes the Control Panel on witch this JPanel will be drawn and the list of matrix writers.
@@ -83,7 +101,7 @@ public class ODMatrix extends JPanel {
 	public JPanel initTab() {
 		
 		// Layer section
-		// Point Layer 
+		// POINT or MULTIPOINT Layer 
 		cboLayerOrigins = new javax.swing.JComboBox();
 		cboLayerOrigins.setBounds(new Rectangle(151, 23, 259, 22));
 		jLblLayerOrigins = new javax.swing.JLabel();
@@ -161,7 +179,7 @@ public class ODMatrix extends JPanel {
 		jLblTolerance.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtTolerance = new JTextField();
 		txtTolerance.setBounds(new Rectangle(152, 148, 94, 22));
-		txtTolerance.setText("100");
+		txtTolerance.setText("1000");
 		jLblToleranceUnits = new JLabel();
 		jLblToleranceUnits.setBounds(new Rectangle(258, 148, 49, 20));
 		jLblToleranceUnits.setText("meters");
@@ -176,6 +194,7 @@ public class ODMatrix extends JPanel {
 				else enableTolerance(true);
 			}
 		});
+		//TODO: Shouldn't the tolerance buttons be present all the time, instead of only when the user wants to create a distance matrix?
 		enableAutoTolerance(false);
 		enableTolerance(false);
 		
@@ -206,7 +225,7 @@ public class ODMatrix extends JPanel {
 	    // Button 'Next'
 		btnNextTab1 = new javax.swing.JButton();
 		btnNextTab1.setText("Next >>");
-		btnNextTab1.setBounds(new Rectangle(284, 275, 136, 26));
+		btnNextTab1.setBounds(new Rectangle(386, 278, 89, 23));
 		btnNextTab1.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnNextODMatrixActionPerformed(evt);
@@ -237,6 +256,7 @@ public class ODMatrix extends JPanel {
 	}
 	
 	// Update the list of layers shown on the JComboBox
+	// Layers of type POINT or MULTIPOINT
 	// TODO: This method needs to be called when the user sees the JPanel to show the point layers
 	public void updateOriginsLayers(Vector<FLyrVect> arrayLayers){
 		cboLayerOriginsModel = new DefaultComboBoxModel(arrayLayers);
@@ -274,58 +294,13 @@ public class ODMatrix extends JPanel {
 		}
 	}
 	
-	/*
-	 * Getters and setters
-	 */
-	// Returns the chosen tolerance value
-	public double getTolerance() {
-		try {
-			return Double.parseDouble(txtTolerance.getText());
-		} catch (NumberFormatException e) {
-			controlPanel.showMessageDialog ("Please_enter_a_valid_number");
-			return tolerance;
-		}
-	}
-	
-	// Returns the file address
-	public String getFileAddress() {
-		return txtGeneratedFile.getText();
-	}
-	
-	// Returns the selected layer
-	// TODO: change the name of the method to getLayer()
-	public FLyrVect getOriginsLayer() {
-		return (FLyrVect) cboLayerOrigins.getSelectedItem();
-	}
-	
-	// Returns the index of the file format
-	public int getFileFormat() {
-		return fileFormat.getSelectedIndex();
-	}
-	
-	// Set the Cost Matrix and its size
-	public void setCostMatrix (CostMatrix costMatrix) {
-		this.costMatrixSize = costMatrix.getSize();
-		this.costMatrix = costMatrix;
-	}
-	
-	// Get the Cost Matrix
-	public CostMatrix getCostMatrix () {
-		return this.costMatrix;
-	}
-	
-	// Get the Size of the Cost Matrix
-	public int getCostMatrixSize() {
-		return this.costMatrixSize;
-	}
-	
 	
 	// The functionality of the "Next >>" button on the first tab
 	// Verifies the file and tolerance validity, then creates or opens ODMatrix file
 	private void btnNextODMatrixActionPerformed(java.awt.event.ActionEvent evt) {
 
 		// Try to get the tolerance
-		tolerance = getTolerance();			
+		maxTolerance = getTolerance();			
 		
 		// Get the file's address
 		selectedFile = new File(getFileAddress());
@@ -340,7 +315,6 @@ public class ODMatrix extends JPanel {
 			
 			// Verify if the user chooses auto tolerance 
 			if (chckbxAuto.isSelected()){ 			// Generate the ODMatrix using auto tolerance value
-				// TODO: escolher tolerancia automáticamente
 				if (!generateODMatrixFile(true)){ 
 					controlPanel.showMessageDialog("Please_select_a_valid_file");
 					return;
@@ -373,83 +347,55 @@ public class ODMatrix extends JPanel {
 
 	// Generates a Origin-Destination File, with the cost to go from any point to any point
 	public boolean generateODMatrixFile(boolean autoTolerance){
+
+		//Get the associated network
+		Network net = VRPExtension.getNetwork();
 		
-		View v = (View) PluginServices.getMDIManager().getActiveWindow();
-		MapContext map = v.getMapControl().getMapContext();
-		SingleLayerIterator it = new SingleLayerIterator(map.getLayers());
+		//Get the selected layer
+		layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+		
+		//Put the flags on the network
+		if (autoTolerance==true){
+			try {
+				originFlags = putFlagsOnNetwork(layerOrigins, net); 
+				flagsOnNet=true;
+			} catch (BaseException ex){
+				ex.printStackTrace();
+			}
+		} else {
+			originFlags = putFlagsOnNetwork(layerOrigins, net, maxTolerance); 
+			flagsOnNet=true;
+		}
 
-			while (it.hasNext())
-			{
-				FLayer aux = it.next();
-				if (!aux.isActive())
-					continue;
-				Network net = (Network) aux.getProperty("network");
+		// For the VRP the origin flags are the same as the destination ones
+		GvFlag[] destinationFlags = originFlags;
 
-				if ( net != null)
-				{
-					try {
-						controlPanel.setMapContext(map);
-
-						if (!autoTolerance) { // TODO: Falta codificar a opção de auto tolerância
-							if (net.getLayer().getISpatialIndex() == null)
-							{
-								System.out.println("Calculando índice espacial (QuadTree, que es más rápido)...");
-								net.getLayer().setISpatialIndex(
-										NetworkUtils.createJtsQuadtree(net.getLayer()));
-								System.out.println("Indice espacial calculado.");
-							}
-							FLyrVect layerOrigins = getOriginsLayer();
-//							FLyrVect layerDestinations = ctrlDlg.getDestinationsLayer();
-//							boolean bSameLayer = false;
-//							if (layerOrigins == layerDestinations)
-//								bSameLayer = true;
-							double tolerance = getTolerance();
-							GvFlag[] originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins,	net, tolerance);
-							GvFlag[] destinationFlags = null; 
-//							if (bSameLayer)
-								destinationFlags = originFlags;
-//							else
-//								destinationFlags = NetworkUtils.putFlagsOnNetwork(layerDestinations, net, tolerance);
-
-							selectedWriter = odMatrixWriters.get(getFileFormat());
-							
-							ODMatrixTask task = new ODMatrixTask(net, originFlags, destinationFlags,
-									selectedFile, selectedWriter);
-							PluginServices.cancelableBackgroundExecution(task);
-							// calculateOdMatrix(net, originFlags, destinationFlags, selectedFile);
-
-							try {
-								while (!task.isFinished())
-									//Wait a little for his completion
-									Thread.sleep(300);
-							} catch (InterruptedException e) {
-								// Print Stack Trace
-								e.printStackTrace();
-							}
-							
-							// TODO: ASK THE USER IF HE WANTS TO SAVE FLAGS TO AVOID PUTTING POINTS
-							// ON NETWORK AGAIN
-							
-							// If the user cancels the task we don't open the file
-							if (task.isCanceled())
-								return false;
-							
-							openODMatrixFile();	// Opens the file so that no-one can change it in between
-							
-							return true;	// Return ok
-						} // isOkPressed
-					} catch (BaseException e) {
-						e.printStackTrace();
-						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
-							controlPanel.showMessageDialog("there_are_points_outside_the_tolerance");
-//							NotificationManager.addError(e.getFormatString(), e);
-						return false; //Return Error
-						}
-					}
-
-				}
-			} 
-		return false; 
+		selectedWriter = odMatrixWriters.get(getFileFormat());
+		
+		ODMatrixTask task = new ODMatrixTask(net, originFlags, destinationFlags,
+				selectedFile, selectedWriter);
+		PluginServices.cancelableBackgroundExecution(task);
+		
+		// calculateOdMatrix(net, originFlags, destinationFlags, selectedFile);
+		
+		try {
+			while (!task.isFinished())
+				//Wait a little for his completion
+				Thread.sleep(300);
+		} catch (InterruptedException e) {
+			// Print Stack Trace
+			e.printStackTrace();
+		}
+		
+		// TODO: ASK THE USER IF HE WANTS TO SAVE FLAGS TO AVOID PUTTING POINTS ON NETWORK AGAIN
+		
+		// If the user cancels the task we don't open the file
+		if (task.isCanceled())
+			return false;
+		
+		openODMatrixFile();	// Opens the file so that no-one can change it in between
+		
+		return true;	// Return ok
 	}
 	
 	
@@ -471,10 +417,213 @@ public class ODMatrix extends JPanel {
             e.printStackTrace();
         }
 		
-		// Get the format of the file
-		selectedWriter = odMatrixWriters.get(getFileFormat());
-		
+		// If the net has no flags:
+		if (!flagsOnNet){
+			// Get the associated network
+			Network net = VRPExtension.getNetwork();
+			
+			// Get the format of the file
+			selectedWriter = odMatrixWriters.get(getFileFormat());
+			
+			// Put the flags on the network
+			layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+			try {
+				originFlags = putFlagsOnNetwork(layerOrigins, net); 
+			} catch (BaseException ex){
+				ex.printStackTrace();
+			}
+		}
 		return true;	// Everything went fine
+	}
+	
+	// TODO: Remove this code
+//	// Put the flags (the nearest points from a point layer) on the network
+//	// This is an automated method. No need to define the tolerance
+//	public GvFlag[] putFlagsOnNetwork(FLyrVect layer, Network net) throws BaseException{
+//
+//		if ( net != null) // If there is a layer with an associated network:
+//		{
+//long start = System.currentTimeMillis();			
+//			setSpatialIndex(net);
+//			
+//			//Iterate throught the points, putting the flags with automated tolerance
+//			ReadableVectorial reader = layer.getSource();
+//			reader.start();
+//			IFeatureIterator it = reader.getFeatureIterator();
+//			int i = 0;
+//			ArrayList<GvFlag> flags = new ArrayList<GvFlag>();
+//			while (it.hasNext()) {
+//				IFeature feat = it.next();
+//				Geometry geo = feat.getGeometry().toJTSGeometry();
+//				if (!((geo instanceof Point) || (geo instanceof MultiPoint)))
+//					continue;
+//
+//				Coordinate[] coords = geo.getCoordinates();
+//				if (coords.length > 1) {
+//					logger.warn("The record " + i + " has " + coords.length + "coordinates. Pay attention!!");
+//					logger.warn("Only one point will be used.");
+//				}
+//
+//				int tolerance = 1;
+//				GvFlag flag;
+//				while (true){
+//					flag = net.addFlag(coords[0].x, coords[0].y, tolerance);
+//					if (flag != null){
+//						System.out.println("Putting flag " + i + " of layer " + layer.getName() + " in idArc=" + flag.getIdArc());
+//						flags.add(flag);
+//						flag.getProperties().put("rec", new Integer(i));
+//						break;
+//					} else if (tolerance > maxTolerance){
+//						controlPanel.showMessageDialog("The automated tolerance chooser couldn't find a suitable tolerance value." +
+//						" Please choose a value bigger than "+maxTolerance);
+//						break;
+//					} else {
+//						tolerance = tolerance * 10;	//Grow the tolerance value
+//					}
+//				}
+//				i++;
+//			}
+//			it.closeIterator();
+//			reader.stop();
+//long stop = System.currentTimeMillis();
+//System.out.println("Took "+ (stop-start) + "ms to put the flags one by one!\n\n");				
+//			return flags.toArray(new GvFlag[0]);
+//		}
+//		return null;
+//	}
+	
+	
+	// Put the flags (the nearest points from a point layer) on the network
+	// This is an automated method. No need to define the tolerance
+	public GvFlag[] putFlagsOnNetwork(FLyrVect layer, Network net) throws BaseException{
+
+		if ( net != null) // If there is a layer with an associated network:
+		{
+long start = System.currentTimeMillis();
+			setSpatialIndex(net);
+
+			int tolerance=1;
+			while (true){
+				try {
+					System.out.println("\nTrying to put flags on the network with a tolerance of "+tolerance);	
+					layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+					originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins, net, tolerance);
+					long stop = System.currentTimeMillis();
+					System.out.println("Took "+ (stop-start) + "ms and it Worked!\n\n");	
+					return originFlags;
+				} catch (BaseException e) {
+					long stop = System.currentTimeMillis();
+					System.out.println("\nTook "+ (stop-start) + "ms but didn't work.");					
+					tolerance = tolerance * 10;
+					if (tolerance>maxTolerance){
+						e.printStackTrace();
+						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
+							controlPanel.showMessageDialog("The automated tolerance chooser couldn't find a suitable tolerance value." +
+									" Please choose a value bigger than "+maxTolerance);
+//							NotificationManager.addError(e.getFormatString(), e);
+							
+						}
+						return null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	// Put the flags (the nearest points from a point layer) on the network using a given tolerance
+	public GvFlag[] putFlagsOnNetwork(FLyrVect layer, Network net, double tolerance){
+		if ( net != null) // If there is a layer with an associated network:
+		{
+			setSpatialIndex(net);
+
+				long start = System.currentTimeMillis();
+				try {
+					System.out.println("\nTrying to put flags on the network with a tolerance of "+tolerance);	
+					layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+					originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins, net, tolerance);
+					long stop = System.currentTimeMillis();
+					System.out.println("Took "+ (stop-start) + "ms and to put all the flags with a tolerance of "+tolerance+"!\n\n");	
+					return originFlags;
+				} catch (BaseException e) {
+					long stop = System.currentTimeMillis();
+					System.out.println("\nTook "+ (stop-start) + "ms but didn't work.");					
+					e.printStackTrace();
+					if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
+						controlPanel.showMessageDialog("there_are_points_outside_the_tolerance");
+//							NotificationManager.addError(e.getFormatString(), e);
+					}
+					return null;
+				}
+			}
+		return null;
+	}
+	
+	// Sets the spatial index
+	public static void setSpatialIndex(Network net){
+		if ( net != null) // If there is a layer with an associated network:
+		{
+			if (net.getLayer().getISpatialIndex() == null)
+			{
+				try {
+					System.out.println("Measuring spatial index (QuadTree)...");
+					net.getLayer().setISpatialIndex(NetworkUtils.createJtsQuadtree(net.getLayer()));
+					System.out.println("Spatial index calculated.");
+				} catch (BaseException e){
+					e.printStackTrace();
+					// TODO: Show (i18n) error message
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Getters and setters
+	 */
+	// Returns the chosen tolerance value
+	public double getTolerance() {
+		try {
+			return Double.parseDouble(txtTolerance.getText());
+		} catch (NumberFormatException e) {
+			controlPanel.showMessageDialog ("Please_enter_a_valid_number");
+			return maxTolerance;
+		}
+	}
+	
+	// Returns the file address
+	public String getFileAddress() {
+		return txtGeneratedFile.getText();
+	}
+	
+	// Returns the selected layer
+	public FLyrVect getLayerOrigins() {
+		return layerOrigins;
+	}
+	
+	// Returns the index of the file format
+	public int getFileFormat() {
+		return fileFormat.getSelectedIndex();
+	}
+	
+	// Set the Cost Matrix and its size
+	public void setCostMatrix (CostMatrix costMatrix) {
+		this.costMatrixSize = costMatrix.getSize();
+		this.costMatrix = costMatrix;
+	}
+	
+	// Get the Cost Matrix
+	public CostMatrix getCostMatrix () {
+		return this.costMatrix;
+	}
+	
+	// Get the Size of the Cost Matrix
+	public int getCostMatrixSize() {
+		return this.costMatrixSize;
+	}
+
+	// Get the flags of the layer
+	public GvFlag[] getOriginFlags() {
+		return originFlags;
 	}
 	
 }

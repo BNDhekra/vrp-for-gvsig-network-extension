@@ -74,7 +74,6 @@ import com.iver.cit.gvsig.project.documents.view.gui.View;
  */
 public class VRPExtension extends Extension {
 
-
 	private static ArrayList<IODMatrixFileWriter> odMatrixWriters = new ArrayList<IODMatrixFileWriter>();
 
 	private static IODMatrixFileWriter selectedWriter;
@@ -102,7 +101,7 @@ public class VRPExtension extends Extension {
 	}
 
 	public void execute(String actionCommand) {
-		
+		//TODO: Replace this +/- 10 lines by getNetwork()
 		View v = (View) PluginServices.getMDIManager().getActiveWindow();
 		MapContext map = v.getMapControl().getMapContext();
 		SingleLayerIterator it = new SingleLayerIterator(map.getLayers());
@@ -118,7 +117,7 @@ public class VRPExtension extends Extension {
 				if ( net != null)
 				{
 //OdMatrixControlPanel ctrlDlg = new OdMatrixControlPanel();
-VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
+VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net);
 					try {
 						ctrlDlg.setMapContext(map);
 						PluginServices.getMDIManager().addWindow(ctrlDlg);
@@ -135,7 +134,36 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
 		}
 	}
 	
+	// Is this extension enabled?
+	// It is enabled when there is a network on some Feature Layer
 	public boolean isEnabled() {
+		Network net = getNetwork();
+		if ( net != null)
+		{
+			return true;
+		}
+		else 
+			return false;
+	}
+
+
+	public boolean isVisible() {
+		IWindow f = PluginServices.getMDIManager().getActiveWindow();
+		if (f == null) {
+		    return false;
+		}
+		if (f instanceof View) {
+			return true;
+		}
+		return false;
+
+	}
+	
+	/*
+	 * Getters and Setters
+	 */
+	// Returns a network defined on a layer
+	public static Network getNetwork(){
 		IWindow window = PluginServices.getMDIManager().getActiveWindow();
 		if (window instanceof View)
 		{
@@ -150,27 +178,10 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
 				if (!aux.isActive())
 					continue;
 				Network net = (Network) aux.getProperty("network");
-				
-				if ( net != null)
-				{
-					return true;
-				}
+				return net;
 			}
 		}
-		return false;
-	}
-
-	public boolean isVisible() {
-		IWindow f = PluginServices.getMDIManager()
-		 .getActiveWindow();
-		if (f == null) {
-		    return false;
-		}
-		if (f instanceof View) {
-			return true;
-		}
-		return false;
-
+		return null;
 	}
 
 	public static IODMatrixFileWriter getSelectedWriter() {
@@ -180,7 +191,6 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters);
 	public static void setSelectedWriter(IODMatrixFileWriter selectedWriter) {
 		VRPExtension.selectedWriter = selectedWriter;
 	}
-
 
 }
 

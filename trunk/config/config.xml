@@ -126,12 +126,12 @@
 			<menu text="Network/Connectivity" icon="connectivity" action-command="CONNECTIVITY"/> 
 		</extension>
 
-<!-- David -->
+<!-- VRP -->
 		<extension class-name="org.gvsig.graph.vrp.VRPExtension" description="VRP"	active="true">
 			<menu text="Network/separator" is_separator="true"/>
 			<menu text="Network/VRP" icon="images/vrp.png" tooltip="VRP" action-command="VRP"/>
 		</extension>
-<!-- /David -->
+<!-- /VRP -->
 
 		<extension class-name="org.gvsig.graph.ClearRouteExtension"
 			description="Remove routes"
