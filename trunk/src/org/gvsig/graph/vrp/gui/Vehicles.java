@@ -175,6 +175,7 @@ public class Vehicles {
 
 		// Create an object with the list of genes (vehicles and customers) to use on the Genetic Algorithm
 		// The customers and depot need to go to the Nodes too
+		createGeneListAndNodes();
 		controlPanel.setNodes(nodes);
 		
 		// Go to the next tab

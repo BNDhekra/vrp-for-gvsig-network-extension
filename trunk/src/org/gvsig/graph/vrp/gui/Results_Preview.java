@@ -253,8 +253,9 @@ System.out.println("O thread WindowInfo iniciou!");
 	
 	// Draw the routes on the overview map
 	public void draw(ArrayList<Route> routes){
-//		View v = (View) PluginServices.getMDIManager().getActiveWindow();
-//		MapControl mapCtrl = v.getMapControl();
+		View v = (View) PluginServices.getMDIManager().getActiveWindow();
+		MapControl mapCtrl = v.getMapControl();
 		createGraphicsFrom(routes, mapCtrl);
+		this.add(mapCtrl);
 	}
 }

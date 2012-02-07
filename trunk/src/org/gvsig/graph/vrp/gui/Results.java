@@ -139,15 +139,15 @@ public class Results {
 		tglbtnPreview.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				if (tglbtnPreview.isSelected()){
-					previewThread = new Thread (preview, "preview");
-					previewThread.start();
+//					previewThread = new Thread (preview, "preview");
+//					previewThread.start();
 					PluginServices.getMDIManager().addWindow(preview);
-					preview.refreshWindowInfo();	// To force a refresh of the WindowInfo
-					preview.repaint();
+//					preview.refreshWindowInfo();	// To force a refresh of the WindowInfo
+//					preview.repaint();
 					tglbtnPreview.setText("Preview <<");
 				}
 				else {
-					previewThread.stop();
+//					previewThread.stop();
 					PluginServices.getMDIManager().closeWindow(preview);
 					tglbtnPreview.setText("Preview >>");
 				}
