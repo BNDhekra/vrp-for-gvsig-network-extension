@@ -13,6 +13,10 @@ import org.metavrp.GA.*;
 import org.metavrp.GA.support.*;
 import org.metavrp.VRP.*;
 
+import com.iver.andami.PluginServices;
+
+import javax.swing.JToggleButton;
+
 //TODO: description of class
 public class Run implements Runnable{
 	
@@ -31,6 +35,7 @@ public class Run implements Runnable{
 	private JLabel generationLabel, bestLabel, averageLabel, worstLabel;
 	private JLabel bestImprovementLabel, averageImprovementLabel, worstImprovementLabel;
 	
+	private Results_Preview preview;					// The Preview window
 	
 	// Constructor.
 	// Just initializes the Control Panel on witch this JPanel will be drawn.
@@ -75,19 +80,19 @@ public class Run implements Runnable{
 		statsJPanel.add(lblWorst);
 		
 		generationLabel = new JLabel("");
-		generationLabel.setBounds(120, 25, 125, 14);
+		generationLabel.setBounds(120, 25, 104, 14);
 		statsJPanel.add(generationLabel);
 		
 		bestLabel = new JLabel("");
-		bestLabel.setBounds(120, 39, 125, 14);
+		bestLabel.setBounds(120, 39, 104, 14);
 		statsJPanel.add(bestLabel);
 		
 		averageLabel = new JLabel("");
-		averageLabel.setBounds(120, 53, 125, 14);
+		averageLabel.setBounds(120, 53, 104, 14);
 		statsJPanel.add(averageLabel);
 		
 		worstLabel = new JLabel("");
-		worstLabel.setBounds(120, 68, 125, 14);
+		worstLabel.setBounds(120, 68, 104, 14);
 		statsJPanel.add(worstLabel);
 		
 		JLabel lblBestValueImprovement = new JLabel("Best value improvement:");
@@ -120,7 +125,7 @@ public class Run implements Runnable{
 		// Graphic area
 		JPanel graphJPanel = new JPanel();
 		graphJPanel.setBorder(new TitledBorder(null, "Graphic", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		graphJPanel.setBounds(10, 173, 457, 97);
+		graphJPanel.setBounds(10, 119, 457, 103);
 		tabRun.add(graphJPanel);
 		graphJPanel.setLayout(null);
 		
@@ -143,6 +148,30 @@ public class Run implements Runnable{
 			}
 		});
 		tabRun.add(btnPreviousTab4);
+		
+		final JToggleButton toggleButton = new JToggleButton("Preview >>");
+		toggleButton.setBounds(386, 233, 89, 23);
+		toggleButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				if (toggleButton.isSelected()){
+//					previewThread = new Thread (preview, "preview");
+//					previewThread.start();
+					PluginServices.getMDIManager().addWindow(preview);
+//					preview.refreshWindowInfo();	// To force a refresh of the WindowInfo
+//					preview.repaint();
+					toggleButton.setText("Preview <<");
+				}
+				else {
+//					previewThread.stop();
+					PluginServices.getMDIManager().closeWindow(preview);
+					toggleButton.setText("Preview >>");
+				}
+			}
+		});
+		
+		tabRun.add(toggleButton);
+		
+		preview = new Results_Preview(controlPanel);
 		
 		return tabRun;
 	}
@@ -256,5 +285,4 @@ public class Run implements Runnable{
 	public Population getVrpLastPopulation() {
 		return vrpLastPopulation;
 	}
-	
 }

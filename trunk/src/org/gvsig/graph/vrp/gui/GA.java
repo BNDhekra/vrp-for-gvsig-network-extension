@@ -79,9 +79,9 @@ public class GA {
 	
 	// Generate an object with the desired GA parameters
 	public GAParameters generateGAParameters(){
-		int popSize=1000;
+		int popSize=100;
         float elitism=0.1f;
-        float mutationProb=0.2f;
+        float mutationProb=0.1f;
         float crossoverProb=0.8f;
         int generations=100;
 		

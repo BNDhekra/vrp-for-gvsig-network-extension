@@ -10,6 +10,7 @@ import javax.swing.JRootPane;
 import com.iver.andami.PluginServices;
 import com.iver.andami.ui.mdiManager.IWindow;
 import com.iver.andami.ui.mdiManager.WindowInfo;
+import com.iver.cit.gvsig.fmap.MapContext;
 import com.iver.cit.gvsig.fmap.MapControl;
 import com.iver.cit.gvsig.fmap.core.IFeature;
 import com.iver.cit.gvsig.fmap.core.IGeometry;
@@ -34,6 +35,7 @@ import java.util.Iterator;
 
 import javax.swing.JTextField;
 
+import org.cresques.cts.ProjectionPool;
 import org.gvsig.graph.core.GraphException;
 import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.core.Network;
@@ -72,7 +74,7 @@ public class Results_Preview extends JPanel implements IWindow, Runnable {
 		txtTeste = new JTextField();
 		txtTeste.setBounds(192, 138, 86, 20);
 		txtTeste.setText("teste");
-		add(txtTeste);
+//		add(txtTeste);
 		txtTeste.setColumns(10);
 //	    setUndecorated(true);									//No decorations (border, buttons, etc)
 //	    getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
@@ -118,17 +120,17 @@ public class Results_Preview extends JPanel implements IWindow, Runnable {
 System.out.println("O thread WindowInfo iniciou!");				
         // From 500ms to 500ms, update the statistics and the graphic
         while(true){
-        	synchronized (this){
-	        	try{
+//        	synchronized (this){
+//	        	try{
 	            	showBestResult();	// Shows the best element of the population
 
-	            	wait(500);			// Wait 500ms
+//	            	wait(15000);			// Wait 500ms
 	        	}
-	        	catch(InterruptedException e){
-	        		e.printStackTrace();
-	        	}
-        	}
-        }
+//	        	catch(InterruptedException e){
+//	        		e.printStackTrace();
+//	        	}
+//        	}
+//        }
 	}
 	
 	// Shows the best element of the population in the content of the window
@@ -138,7 +140,7 @@ System.out.println("O thread WindowInfo iniciou!");
 		
 		//2. Save the original flags
 		GvFlag[] flagsBackup = net.getFlags();
-		
+
 		//3. Remove all the flags from the network
 		net.removeFlags();
 		
@@ -171,12 +173,18 @@ System.out.println("O thread WindowInfo iniciou!");
 		
 		Gene geneA, geneB;
 		GvFlag flagA, flagB;
-		for (int i=1; i<bestChromosome.getLenght(); i++){
+		int lenght = bestChromosome.getLenght();
+		for (int i=1; i<lenght; i++){
+System.out.println("\n\ni = "+i);			
 			geneA = bestChromosome.getGene(i-1);
+System.out.println("GeneA: " + geneA.toString());			
 			geneB = bestChromosome.getGene(i);
+System.out.println("GeneB: " + geneB.toString());
 			
 			flagA = nodes.getNode(geneA).getFlag();
+System.out.println("FlagA: " + flagA.toString());
 			flagB = nodes.getNode(geneB).getFlag();
+System.out.println("FlagB: " + flagB.toString());
 			
 			routes.add(calculateRoute(flagA, flagB, net));
 		}
@@ -195,7 +203,6 @@ System.out.println("O thread WindowInfo iniciou!");
 			solver.setNetwork(net);
 			net.addFlag(flag1);
 			net.addFlag(flag2);
-			// TODO: Verificar se a propriedade é mesmo esta...
 			String fieldStreetName = (String) net.getLayer().getProperty("network_fieldStreetName");
 			solver.setFielStreetName(fieldStreetName);
 			route = solver.calculateRoute();
@@ -242,7 +249,7 @@ System.out.println("O thread WindowInfo iniciou!");
 			FGraphic graphic = new FGraphic(gAux, idSymbolLine);
 			graphic.setTag("ROUTE");
 			graphicsRoute.add(graphic);
-//			graphicLayer.insertGraphic(0, graphic);
+			graphicLayer.insertGraphic(0, graphic);
 		}
 		// Lo insertamos al principio de la lista para que los
 		// pushpins se dibujen después.
@@ -253,9 +260,14 @@ System.out.println("O thread WindowInfo iniciou!");
 	
 	// Draw the routes on the overview map
 	public void draw(ArrayList<Route> routes){
-		View v = (View) PluginServices.getMDIManager().getActiveWindow();
-		MapControl mapCtrl = v.getMapControl();
-		createGraphicsFrom(routes, mapCtrl);
-		this.add(mapCtrl);
+//		MapControl mapCtrl = new MapControl();
+		MapControl mapCtrl = controlPanel.getMapControl();
+		this.add(mapCtrl, java.awt.BorderLayout.CENTER);
+		for (Route route:routes){
+			createGraphicsFrom(route.getFeatureList(), mapCtrl);
+		}
+//		mapCtrl.setProjection(controlPanel.getProjection());
+//		mapCtrl.setSize(this.getWidth(), this.getHeight());
+//		mapCtrl.commandRepaint();
 	}
 }

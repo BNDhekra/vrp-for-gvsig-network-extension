@@ -73,6 +73,8 @@ import com.iver.cit.gvsig.project.documents.view.gui.View;
  * ODMatrixControlPanel sets selectedWriter to allow multiple export formats
  */
 public class VRPExtension extends Extension {
+	
+	private static MapControl mapControl;
 
 	private static ArrayList<IODMatrixFileWriter> odMatrixWriters = new ArrayList<IODMatrixFileWriter>();
 
@@ -101,25 +103,15 @@ public class VRPExtension extends Extension {
 	}
 
 	public void execute(String actionCommand) {
-		//TODO: Replace this +/- 10 lines by getNetwork()
-		View v = (View) PluginServices.getMDIManager().getActiveWindow();
-		MapContext map = v.getMapControl().getMapContext();
-		SingleLayerIterator it = new SingleLayerIterator(map.getLayers());
-
 		if (actionCommand.equals("VRP")) {
-			while (it.hasNext())
-			{
-				FLayer aux = it.next();
-				if (!aux.isActive())
-					continue;
-				Network net = (Network) aux.getProperty("network");
+			Network net = getNetwork();
 
-				if ( net != null)
-				{
+			if ( net != null)
+			{
 //OdMatrixControlPanel ctrlDlg = new OdMatrixControlPanel();
-VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net);
+VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net, this);
 					try {
-						ctrlDlg.setMapContext(map);
+						ctrlDlg.setMapContext(mapControl.getMapContext());
 						PluginServices.getMDIManager().addWindow(ctrlDlg);
 
 					} catch (BaseException e) {
@@ -127,10 +119,9 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net);
 						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
 							JOptionPane.showMessageDialog((Component) PluginServices.getMainFrame(), PluginServices.getText(null, "there_are_points_outside_the_tolerance"));
 //							NotificationManager.addError(e.getFormatString(), e);
-						}
 					}
 				}
-			} 
+			}
 		}
 	}
 	
@@ -168,8 +159,8 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net);
 		if (window instanceof View)
 		{
 			View v = (View) window;
-	        MapControl mapCtrl = v.getMapControl();
-			MapContext map = mapCtrl.getMapContext();
+	        mapControl = v.getMapControl();
+			MapContext map = mapControl.getMapContext();
 			
 			SingleLayerIterator it = new SingleLayerIterator(map.getLayers());
 			while (it.hasNext())
@@ -183,6 +174,11 @@ VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net);
 		}
 		return null;
 	}
+	
+	public MapControl getMapControl(){
+		return mapControl;
+	}
+
 
 	public static IODMatrixFileWriter getSelectedWriter() {
 		return selectedWriter;

@@ -11,9 +11,11 @@ import java.util.*;
 import java.awt.*;
 import javax.swing.*;
 
+import org.cresques.cts.IProjection;
 import org.gvsig.exceptions.BaseException;
 import org.gvsig.graph.IODMatrixFileWriter;
 import org.gvsig.graph.core.Network;
+import org.gvsig.graph.vrp.VRPExtension;
 import org.gvsig.graph.vrp.support.Costs;
 import org.gvsig.graph.vrp.support.Nodes;
 
@@ -23,6 +25,7 @@ import com.iver.andami.ui.mdiManager.WindowInfo;
 
 import com.iver.cit.gvsig.fmap.core.FShape;
 import com.iver.cit.gvsig.fmap.MapContext;
+import com.iver.cit.gvsig.fmap.MapControl;
 import com.iver.cit.gvsig.fmap.layers.FLayers;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
 import com.iver.cit.gvsig.fmap.layers.LayersIterator;
@@ -34,8 +37,8 @@ import com.iver.cit.gvsig.fmap.layers.FLayer;
  * @author David Pinheiro
  */
 public class VRPControlPanel extends JPanel implements IWindow {
-
-	private MapContext mapContext;
+	
+	private VRPExtension extension = null;
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
 	private Network network;
 	private WindowInfo wi;
@@ -91,7 +94,8 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	}
 
 	/** Creates new form OdMatrixControlPanel */
-	public VRPControlPanel(ArrayList<IODMatrixFileWriter> odMatrixWriters, Network net) {
+	public VRPControlPanel(ArrayList<IODMatrixFileWriter> odMatrixWriters, Network net, VRPExtension extension) {
+		this.extension=extension;
 		this.odMatrixWriters=odMatrixWriters;
 		this.network=net;
 		initComponents();
@@ -169,7 +173,6 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	
 	// TODO: Is this method really needed?
 	public void setMapContext(MapContext mapContext) throws BaseException {
-		this.mapContext = mapContext;
 		FLayers layers = mapContext.getLayers();
 		LayersIterator it = new LayersIterator(layers);
 		Vector<FLyrVect> arrayLayers = new Vector<FLyrVect>();
@@ -202,6 +205,14 @@ public class VRPControlPanel extends JPanel implements IWindow {
 			wi.setTitle(_T("vrp_control_panel"));
 		}
 		return wi;
+	}
+	
+	public IProjection getProjection(){
+		return extension.getMapControl().getProjection();
+	}
+	
+	public MapControl getMapControl(){
+		return extension.getMapControl();
 	}
 	
 	public Object getWindowProfile(){
