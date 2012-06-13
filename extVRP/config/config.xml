@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<plugin-config>
+	<libraries library-dir="./lib">
+	</libraries>
+	<depends plugin-name="com.iver.cit.gvsig"/>
+	<depends plugin-name="com.iver.cit.gvsig.geoprocessextensions"/>
+	<depends plugin-name="com.iver.cit.gvsig.cad"/>
+	<depends plugin-name="org.gvsig.graph"/>
+		<resourceBundle name="text"/>
+	<extensions>
+
+<!-- VRP -->
+		<extension class-name="org.gvsig.graph.vrp.VRPExtension" description="VRP"	active="true">
+			<menu text="Network/separator" is_separator="true"/>
+			<menu text="Network/VRP" icon="images/vrp.png" tooltip="VRP" action-command="VRP"/>
+		</extension>
+<!-- /VRP -->
+
+
+	</extensions>
+</plugin-config>
