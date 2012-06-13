@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="/_fwAndami"/>
+	<classpathentry kind="src" path="/libFMap"/>
+	<classpathentry kind="src" path="/libIverUtiles"/>
+	<classpathentry kind="src" path="/appgvSIG"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/extGeoProcessing"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/extCAD"/>
+	<classpathentry kind="lib" path="/libFMap/lib/driver-manager-1.1.jar" sourcepath="/libDriverManager"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/extGeoprocessingExtensions"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/extJCRS"/>
+	<classpathentry kind="lib" path="/libFMap/lib/org.cresques.cts.jar"/>
+	<classpathentry kind="lib" path="/libFMap/lib/gdbms-0.8-SNAPSHOT.jar" sourcepath="/libGDBMS"/>
+	<classpathentry kind="lib" path="/_fwAndami/lib/org.gvsig.ui.jar" sourcepath="/libUIComponent/src"/>
+	<classpathentry kind="lib" path="/_fwAndami/lib/org.gvsig.exceptions.jar"/>
+	<classpathentry kind="lib" path="/_fwAndami/lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="lib" path="lib/cloning-1.7.4.jar"/>
+	<classpathentry kind="lib" path="lib/objenesis-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/metaVRP.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/extGraph"/>
+	<classpathentry kind="lib" path="/libFMap/lib/jts-1.12.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
