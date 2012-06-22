@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 
+import org.apache.log4j.Logger;
 import org.gvsig.exceptions.BaseException;
 import org.gvsig.fmap.util.LayerListCellRenderer;
 import org.gvsig.graph.core.GraphException;
@@ -71,6 +72,8 @@ public class ODMatrix extends JPanel {
 	private File selectedFile;	// The file with the ODMatrix
 	private JButton btnSelectFile;
 	private JLabel jLblTolerance = null;
+	
+	// TODO: Set this field to a JFormattedTextField, to prevent the insertion of non-numbers
 	private JTextField txtTolerance = null;
 	private JLabel jLblToleranceUnits = null;
 	private JCheckBox chckbxAuto;
@@ -82,6 +85,8 @@ public class ODMatrix extends JPanel {
 	private CostMatrix costMatrix;
 	private int costMatrixSize;
 	private boolean flagsOnNet=false;
+	
+	static Logger logger = Logger.getLogger(NetworkUtils.class);
 	
 	
 	// Constructor.
@@ -295,7 +300,7 @@ public class ODMatrix extends JPanel {
 	// The functionality of the "Next >>" button on the first tab
 	// Verifies the file and tolerance validity, then creates or opens ODMatrix file
 	private void btnNextODMatrixActionPerformed(java.awt.event.ActionEvent evt) {
-
+		
 		// Try to get the tolerance
 		maxTolerance = getTolerance();			
 		
@@ -334,8 +339,11 @@ public class ODMatrix extends JPanel {
 		// Create the Distance Matrix
 		setCostMatrix(openCostMatrix(selectedFile));
 		
-		// Update the list of options (the list of possible nodes) for the depot
-		controlPanel.getVehicles().updateDepotOptions();
+		// Update the list of possible fields of customer demands on the Customers tab.
+		// If it isn't successful, stay on this tab.
+		if (!controlPanel.getCustomers().fillCustomersDemandComboBox()){
+			return;
+		}
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
@@ -432,62 +440,6 @@ public class ODMatrix extends JPanel {
 		}
 		return true;	// Everything went fine
 	}
-	
-	// TODO: Remove this code
-//	// Put the flags (the nearest points from a point layer) on the network
-//	// This is an automated method. No need to define the tolerance
-//	public GvFlag[] putFlagsOnNetwork(FLyrVect layer, Network net) throws BaseException{
-//
-//		if ( net != null) // If there is a layer with an associated network:
-//		{
-//long start = System.currentTimeMillis();			
-//			setSpatialIndex(net);
-//			
-//			//Iterate throught the points, putting the flags with automated tolerance
-//			ReadableVectorial reader = layer.getSource();
-//			reader.start();
-//			IFeatureIterator it = reader.getFeatureIterator();
-//			int i = 0;
-//			ArrayList<GvFlag> flags = new ArrayList<GvFlag>();
-//			while (it.hasNext()) {
-//				IFeature feat = it.next();
-//				Geometry geo = feat.getGeometry().toJTSGeometry();
-//				if (!((geo instanceof Point) || (geo instanceof MultiPoint)))
-//					continue;
-//
-//				Coordinate[] coords = geo.getCoordinates();
-//				if (coords.length > 1) {
-//					logger.warn("The record " + i + " has " + coords.length + "coordinates. Pay attention!!");
-//					logger.warn("Only one point will be used.");
-//				}
-//
-//				int tolerance = 1;
-//				GvFlag flag;
-//				while (true){
-//					flag = net.addFlag(coords[0].x, coords[0].y, tolerance);
-//					if (flag != null){
-//						System.out.println("Putting flag " + i + " of layer " + layer.getName() + " in idArc=" + flag.getIdArc());
-//						flags.add(flag);
-//						flag.getProperties().put("rec", new Integer(i));
-//						break;
-//					} else if (tolerance > maxTolerance){
-//						controlPanel.showMessageDialog("The automated tolerance chooser couldn't find a suitable tolerance value." +
-//						" Please choose a value bigger than "+maxTolerance);
-//						break;
-//					} else {
-//						tolerance = tolerance * 10;	//Grow the tolerance value
-//					}
-//				}
-//				i++;
-//			}
-//			it.closeIterator();
-//			reader.stop();
-//long stop = System.currentTimeMillis();
-//System.out.println("Took "+ (stop-start) + "ms to put the flags one by one!\n\n");				
-//			return flags.toArray(new GvFlag[0]);
-//		}
-//		return null;
-//	}
 	
 	
 	// Put the flags (the nearest points from a point layer) on the network

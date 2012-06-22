@@ -74,9 +74,10 @@ public class Nodes {
 	}
 	
 	// Get the node by gene
+	// TODO: Analyze the case of the depot that has more than one vehicle
 	public Node getNode(Gene gene){
 		for (Node node:nodes){
-			if (node.getGene()==gene){
+			if (node.getGene().getNode()==gene.getNode()){
 				return node;
 			}
 		}

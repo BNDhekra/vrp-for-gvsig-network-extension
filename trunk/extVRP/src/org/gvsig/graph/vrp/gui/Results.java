@@ -5,6 +5,7 @@ package org.gvsig.graph.vrp.gui;
 
 //Needed imports
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JFrame;
@@ -20,10 +21,22 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 
+import org.gvsig.graph.core.GvFlag;
+import org.gvsig.graph.core.Network;
+import org.gvsig.graph.core.NetworkUtils;
+import org.gvsig.graph.solvers.Route;
+import org.gvsig.graph.vrp.support.DrawRoutes;
 import org.metavrp.GA.Chromosome;
 import org.metavrp.GA.Population;
 
 import com.iver.andami.PluginServices;
+import com.iver.cit.gvsig.exceptions.layers.ReloadLayerException;
+import com.iver.cit.gvsig.fmap.core.IFeature;
+import com.iver.cit.gvsig.fmap.drivers.ConcreteMemoryDriver;
+import com.iver.cit.gvsig.fmap.drivers.MemoryDriver;
+import com.iver.cit.gvsig.fmap.layers.FLayer;
+import com.iver.cit.gvsig.fmap.layers.LayerFactory;
+import com.iver.cit.gvsig.util.GvSession;
 
 import javax.swing.border.TitledBorder;
 import javax.swing.JToggleButton;
@@ -95,10 +108,12 @@ public class Results {
 		});
 		
 		JLabel lblShowTop = new JLabel("Show the top");
+lblShowTop.setEnabled(false);
 		lblShowTop.setBounds(10, 229, 64, 14);
 		tabResults.add(lblShowTop);
 		
 		textField = new JTextField();
+textField.setEnabled(false);
 		textField.setBounds(76, 227, 30, 20);
 		tabResults.add(textField);
 		textField.setText("10");
@@ -126,15 +141,26 @@ public class Results {
 		tabResults.add(panel);
 		panel.setLayout(null);
 		
-		JButton button = new JButton("Point");
-		button.setBounds(10, 19, 89, 23);
-		panel.add(button);
+		JButton exportPointsButton = new JButton("Point");
+		exportPointsButton.setBounds(10, 19, 89, 23);
+		exportPointsButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				exportPoints(controlPanel.getRun().getBestElement());
+			}
+		});
+		panel.add(exportPointsButton);
 		
-		JButton button_1 = new JButton("Line");
-		button_1.setBounds(109, 19, 89, 23);
-		panel.add(button_1);
+		JButton exportLinesButton = new JButton("Line");
+		exportLinesButton.setBounds(109, 19, 89, 23);
+		exportLinesButton.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				exportLines(controlPanel.getRun().getBestElement());
+			}
+		});
+		panel.add(exportLinesButton);
 		
 		final JToggleButton tglbtnPreview = new JToggleButton("Preview >>");
+tglbtnPreview.setEnabled(false);		
 		tglbtnPreview.setBounds(386, 233, 89, 23);
 		tglbtnPreview.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -194,6 +220,84 @@ public class Results {
         	tableModel.addRow(row);
          }
 	}
+	
+	/*
+	 * Exports the Chromosome to a point layer
+	 */
+	public void exportPoints(Chromosome bestChr){
+		//1. Get the network
+		Network net = controlPanel.getNetwork();
+		
+		//2. Save the original flags
+		GvFlag[] flagsBackup = net.getFlags();
+
+		//3. Remove all the flags from the network
+		net.removeFlags();
+		
+		//4. Draw the straight lines on the layer
+		// TODO: Verificar o caso do veículo ter que regressar à base antes do próximo veículo.
+		// TODO: Verificar também o caso do veiculo regressar à base para descarregar, por estar cheio.
+		// TODO: Desenhar com cores diferentes para veículos diferentes.
+		// Create the list of lines
+		ArrayList<IFeature> geometries = null;
+		// Calculate the lines between all the adjacent nodes of the chromosome
+		geometries = DrawRoutes.calculateStraightRoutes(bestChr, controlPanel);
+// TODO: Another Option
+//GvSession.getInstance().put(mapCtrl, "Route", routes);		
+		// Clear the features from the GraphicLayer
+		NetworkUtils.clearRouteFromGraphics(controlPanel.getMapControl());
+		// Draw the features on the map
+		DrawRoutes.createGraphicsFrom(geometries, controlPanel.getMapControl());
+		
+		//5. Rebuild the original flags
+		net.removeFlags();
+		for (GvFlag flag : flagsBackup){
+			net.addFlag(flag);
+		}
+	}
+	
+	/*
+	 * Exports the Chromosome to a Line layer
+	 */
+	public void exportLines(Chromosome bestChr){
+		//1. Get the network
+		Network net = controlPanel.getNetwork();
+		
+		//2. Save the original flags
+		GvFlag[] flagsBackup = net.getFlags();
+
+		//3. Remove all the flags from the network
+		net.removeFlags();
+		
+		//4. Draw the lines on the layer
+		// TODO: Verificar o caso do veículo ter que regressar à base antes do próximo veículo.
+		// TODO: Verificar também o caso do veiculo regressar à base para descarregar, por estar cheio.
+		// TODO: Desenhar com cores diferentes para veículos diferentes.
+		// Create the list of routes
+		ArrayList<Route> routes = null;
+		// Calculate the routes between all the adjacent nodes of the chromosome
+		routes = DrawRoutes.calculateRoutes(bestChr, net, controlPanel, tabResults);
+		// Draw the routes on the map
+//		FLayer roadLayer = net.getLayer();
+		// Create a memory driver
+//		MemoryDriver driver = new ConcreteMemoryDriver();
+
+//		FLayer roadLayer = LayerFactory.createLayer("VehileRouting", driver, net.getLayer().getProjection());
+
+//		controlPanel.getMapControl().getMapContext().addToTrackLayer(vectorial);
+		
+		NetworkUtils.clearRouteFromGraphics(controlPanel.getMapControl());
+		for (Route route:routes){
+			NetworkUtils.drawRouteOnGraphics(controlPanel.getMapControl(), route);
+		}
+		
+		//5. Rebuild the original flags
+		net.removeFlags();
+		for (GvFlag flag : flagsBackup){
+			net.addFlag(flag);
+		}
+	}
+	
 	
 	// Returns the final population. All his chromosomes
 	public Chromosome[] getFinalPop() {
