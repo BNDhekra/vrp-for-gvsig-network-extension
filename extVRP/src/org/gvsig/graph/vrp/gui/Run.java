@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
 import org.metavrp.GA.*;
 import org.metavrp.GA.support.*;
 import org.metavrp.VRP.*;
@@ -27,6 +28,7 @@ public class Run implements Runnable{
 	private VRPGARun run;					// The Runnable Genetic Algorithm
 	private Thread vrpThread;				// The thread that runs the Genetic Algorithm
 	private Thread statsThread;				// The thread that updates the statistics 
+	private Thread previewThread;						// The Preview window's thread (that updates his content)
 	
 	private double initialBestElementCost;	// The cost of the best individual of the initial (randomly generated) population 
 	private Population vrpLastPopulation;	// The last population
@@ -150,19 +152,20 @@ public class Run implements Runnable{
 		tabRun.add(btnPreviousTab4);
 		
 		final JToggleButton toggleButton = new JToggleButton("Preview >>");
+		toggleButton.setEnabled(false);
 		toggleButton.setBounds(386, 233, 89, 23);
 		toggleButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				if (toggleButton.isSelected()){
-//					previewThread = new Thread (preview, "preview");
-//					previewThread.start();
+					previewThread = new Thread (preview, "preview");
+					previewThread.start();
 					PluginServices.getMDIManager().addWindow(preview);
 //					preview.refreshWindowInfo();	// To force a refresh of the WindowInfo
 //					preview.repaint();
 					toggleButton.setText("Preview <<");
 				}
 				else {
-//					previewThread.stop();
+					previewThread.stop();
 					PluginServices.getMDIManager().closeWindow(preview);
 					toggleButton.setText("Preview >>");
 				}
@@ -181,8 +184,8 @@ public class Run implements Runnable{
 	public void go(){
 		statsThread = new Thread (this, "stats");
 		vrpThread = new Thread (run, "metaVRP");
-		statsThread.start();
 		vrpThread.start();
+		statsThread.start();
 	}
 	
 	// Update the statistics values and the graphic
@@ -191,10 +194,11 @@ public class Run implements Runnable{
         while(true){
         	synchronized (this){
 	        	try{
+	        		wait(500);			// Wait some ms
+	        		
 	            	updateStatistics();	// Update the statistics
 	            	updateGraphic();	// Update the graphic
 
-	            	wait(200);			// Wait 200ms
 	            	if (!isRunning()) btnNextTab4.setText("Next >>");	// If the run ends, change the button from "Stop!" to "Next >>"
 	        	}
 	        	catch(InterruptedException e){
@@ -242,9 +246,11 @@ public class Run implements Runnable{
     	vrpLastPopulation = run.getPopulation();
 		
 		if (isRunning()){
-			// Stop the thread
-			vrpThread.stop();
+			// Stop the threads
 			statsThread.stop();
+			run.setShouldStop(true);
+//			vrpThread.stop();
+
 			btnNextTab4.setText("Next >>");			// Change the button's text to "Next >>"
 		} else {	// Otherwise go to the next tab.
 			Results results = controlPanel.getResults();
@@ -274,6 +280,11 @@ public class Run implements Runnable{
 	// Returns the cost of the best element of the initial (randomly generated) population
 	public double getInitialBestElementCost() {
 		return initialBestElementCost;
+	}
+	
+	// Returns the best element of the final population. The chromosome with the best fitness
+	public Chromosome getBestElement() {
+		return getVrpCurrentPopulation().getTop(1)[0];
 	}
 
 	// Returns the current Population

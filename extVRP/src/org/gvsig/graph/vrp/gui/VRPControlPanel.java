@@ -53,10 +53,11 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	 */
 	// Panels
 	private JTabbedPane tabs;
-	private JPanel tabLayers, tabVehicles, tabGA, tabRun, tabResults;
+	private JPanel tabLayers, tabCustomers, tabVehicles, tabGA, tabRun, tabResults;
 	
 	// Panel Objects
 	private ODMatrix odmatrix;
+	private Customers customers;
 	private Vehicles vehicles;
 	private GA ga;
 	private Run run;
@@ -116,24 +117,29 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		odmatrix = new ODMatrix(this, odMatrixWriters);
 		tabLayers = odmatrix.initTab();
 		tabs.addTab("OD Matrix", null, tabLayers, null);
+		
+		// Second tab: Customers
+		customers = new Customers(this);
+		tabCustomers = customers.initTab();
+		tabs.addTab("Customers", null, tabCustomers, null);
 
-		// Second tab: Vehicles
+		// Third tab: Vehicles
 		vehicles = new Vehicles(this);
 		tabVehicles = vehicles.initTab();
 		tabs.addTab("Vehicles", null, tabVehicles, null);
 		
-		// Third tab: Genetic Algorithm
+		// Fourth tab: Genetic Algorithm
 		ga = new GA(this);
 		tabGA = ga.initTab();
 		tabs.addTab("GA", null, tabGA, null);
 		
-		// Fourth tab: Run the GA
+		// Fifth tab: Run the GA
 		run = new Run(this);
 		tabRun = run.initTab();
 //		run.run();	// Prepare the thread to run when the problem is correctly defined 
 		tabs.addTab("Run", null, tabRun, null);
 
-		// Fifth tab: Best Results
+		// Sixth tab: Best Results
 		results = new Results(this);
 		tabResults = results.initTab();
 		tabs.addTab("Results", null, tabResults, null);
@@ -150,6 +156,7 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		tabs.setEnabledAt(2, false);
 		tabs.setEnabledAt(3, false);
 		tabs.setEnabledAt(4, false);
+		tabs.setEnabledAt(5, false);
 	}
 
 	public void closeWindow() {
@@ -171,11 +178,20 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	 * Getters and Setters
 	 */
 	
-	// TODO: Is this method really needed?
-	public void setMapContext(MapContext mapContext) throws BaseException {
+	/**
+	 * Returns all the layers of type POINT and MULTIPOINT
+	 */
+	public Vector<FLyrVect> getPointLayers(MapContext mapContext) throws BaseException {
+		/** Layers currently on the workspace */
 		FLayers layers = mapContext.getLayers();
+		
+		/** Layer iterator */
 		LayersIterator it = new LayersIterator(layers);
+		
+		/** A vector of layers (of the type FLyrVect) */
 		Vector<FLyrVect> arrayLayers = new Vector<FLyrVect>();
+		
+		// Iterates through every layer on the workspace and puts the ones of type POINT or MULTIPOINT on an array
 		while (it.hasNext()) {
 			FLayer lyr = it.nextLayer();
 			if (!lyr.isAvailable())
@@ -188,10 +204,21 @@ public class VRPControlPanel extends JPanel implements IWindow {
 			}
 		}
 		
+		return arrayLayers;
+	}
+	
+	/**
+	 * 
+	 * @param mapContext
+	 * @throws BaseException
+	 */
+	// TODO: Is this method really needed?
+	public void setMapContext(MapContext mapContext) throws BaseException {
+		
 		// If the object tabLayers is instantiated, update its layers
 		// TODO: First detect that the ODMatrix JPanel has been initialized with initTab, otherwise
 		// this will throw an exception? Or try to find a workaround
-			odmatrix.updateOriginsLayers(arrayLayers);
+			odmatrix.updateOriginsLayers(getPointLayers(mapContext));
 	}
 	
 
@@ -240,6 +267,11 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	// Returns the ODMatrix object
 	public ODMatrix getODMatrix(){
 		return odmatrix;
+	}
+	
+	// Returns the Customers object
+	public Customers getCustomers(){
+		return customers;
 	}
 	
 	// Returns the Vehicles object
