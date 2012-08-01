@@ -40,6 +40,7 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	
 	private VRPExtension extension = null;
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
+	private MapContext mapContext;
 	private Network network;
 	private WindowInfo wi;
 	private Nodes nodes;
@@ -215,12 +216,22 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	// TODO: Is this method really needed?
 	public void setMapContext(MapContext mapContext) throws BaseException {
 		
+		this.mapContext = mapContext;
+		
 		// If the object tabLayers is instantiated, update its layers
 		// TODO: First detect that the ODMatrix JPanel has been initialized with initTab, otherwise
 		// this will throw an exception? Or try to find a workaround
 			odmatrix.updateOriginsLayers(getPointLayers(mapContext));
 	}
 	
+	/**
+	 * Returns the map context
+	 * 
+	 * @return MapContext
+	 */
+	public MapContext getMapContext() {
+		return mapContext;
+	}
 
 	public WindowInfo getWindowInfo() {
 		if (wi == null) {

@@ -77,6 +77,19 @@ public class Customers {
 		
 		customersDemandComboBox = new JComboBox<String>();
 		customersDemandComboBox.setBounds(167, 8, 209, 23);
+		customersDemandComboBox.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				int selectedFieldIndex = 0;
+				try{
+					String selectedField = customersDemandComboBox.getSelectedItem().toString();
+					selectedFieldIndex = controlPanel.getODMatrix().getLayerOrigins().getRecordset().getFieldIndexByName(selectedField);
+				} catch (ReadDriverException ex){
+					ex.printStackTrace();
+				}
+			
+				grabCustomersDemand(selectedFieldIndex);
+			}
+		});
 		tabCustomers.add(customersDemandComboBox);
 		
 		JLabel lblCustomersTimeWindow = new JLabel("Customer's time window 1:");
@@ -300,20 +313,6 @@ public class Customers {
 			}
 			customersDemandComboBox.setSelectedIndex(0);
 			
-			customersDemandComboBox.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					int selectedFieldIndex = 0;
-					try{
-						String selectedField = customersDemandComboBox.getSelectedItem().toString();
-						selectedFieldIndex = controlPanel.getODMatrix().getLayerOrigins().getRecordset().getFieldIndexByName(selectedField);
-					} catch (ReadDriverException ex){
-						ex.printStackTrace();
-					}
-				
-					grabCustomersDemand(selectedFieldIndex);
-				}
-			});
-			
 			return true;
 		}
 	}
@@ -336,15 +335,15 @@ public class Customers {
 	}
 	
 	/**
-	 * The button "Next" guarantees that we have the customer's demands and the goes to the next tab
+	 * The button "Next" guarantees that we have the customer's demands and goes to the next tab
 	 */
 	private void btnNextCustomersActionPerformed(){
-		// 1. If the user didn't choose any option, show an alert  
+		// If the user didn't choose any option, show an alert  
 		if (customersDemandComboBox.getSelectedIndex()==0){
 			controlPanel.showMessageDialog("No_field_selected");
 			return;
 		}
-		
+	
 		// Initialize the next tab 
 		controlPanel.getVehicles().initialSetup();
 		
