@@ -24,7 +24,7 @@ import java.awt.FlowLayout;
 import javax.swing.DefaultComboBoxModel;
 
 //TODO: description of class
-public class GA {
+public class GA implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabGA;
@@ -210,6 +210,20 @@ public class GA {
 		panel_1.add(lblInnerDepotPenalty);
 
 		return tabGA;
+	}
+	
+	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		
 	}
 	
 	// Enables / Disables the operators and parameters definitions

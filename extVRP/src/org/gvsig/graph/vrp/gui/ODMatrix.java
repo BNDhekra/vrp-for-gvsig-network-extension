@@ -4,64 +4,55 @@
 package org.gvsig.graph.vrp.gui;
 
 // Needed imports
+import java.awt.Component;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Vector;
-import java.awt.Rectangle;
-import java.awt.Component;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JFileChooser;
-import javax.swing.SwingConstants;
+
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import org.apache.log4j.Logger;
 import org.gvsig.exceptions.BaseException;
 import org.gvsig.fmap.util.LayerListCellRenderer;
-import org.gvsig.graph.core.GraphException;
 import org.gvsig.graph.IODMatrixFileWriter;
 import org.gvsig.graph.ODMatrixExtension;
+import org.gvsig.graph.core.GraphException;
+import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.core.Network;
 import org.gvsig.graph.core.NetworkUtils;
-import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.gui.ODMatrixTask;
 import org.gvsig.graph.vrp.VRPExtension;
+import org.gvsig.graph.vrp.support.Layers;
+import org.metavrp.problem.CostMatrix;
 
+
+import com.hardcode.gdbms.driver.exceptions.ReadDriverException;
 import com.iver.andami.PluginServices;
-import com.iver.cit.gvsig.fmap.MapContext;
-import com.iver.cit.gvsig.fmap.core.IFeature;
-import com.iver.cit.gvsig.fmap.drivers.IFeatureIterator;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
-import com.iver.cit.gvsig.fmap.layers.ReadableVectorial;
-import com.iver.cit.gvsig.fmap.layers.SingleLayerIterator;
-import com.iver.cit.gvsig.fmap.layers.FLayer;
-import com.iver.cit.gvsig.project.documents.view.gui.View;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-
-import org.metavrp.VRP.*;
 
 // TODO: description of class
-public class ODMatrix extends JPanel {
+public class ODMatrix extends JPanel implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private static IODMatrixFileWriter selectedWriter;	// The kind of file to write (there are 3 types)
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
-	private DefaultComboBoxModel cboLayerOriginsModel;
-	private FLyrVect layerOrigins;
+	private FLyrVect customersLayer;
 	private GvFlag[] originFlags;
-	private JComboBox cboLayerOrigins;
-	private JLabel jLblLayerOrigins;
+	private JComboBox<String> customersLayerList;
+	private JLabel jLblCustomersLayer;
 	private JPanel layerJPanel;
 	private JRadioButton opt1, opt2;
 	private ButtonGroup bgroup;
@@ -104,19 +95,24 @@ public class ODMatrix extends JPanel {
 		
 		// Layer section
 		// POINT or MULTIPOINT Layer 
-		cboLayerOrigins = new javax.swing.JComboBox();
-		cboLayerOrigins.setBounds(new Rectangle(151, 23, 259, 22));
-		jLblLayerOrigins = new javax.swing.JLabel();
-		jLblLayerOrigins.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-		jLblLayerOrigins.setBounds(new Rectangle(10, 24, 135, 20));
-		jLblLayerOrigins.setText("Point Layer:");
+		customersLayerList = new javax.swing.JComboBox<String>();
+		customersLayerList.setBounds(new Rectangle(151, 23, 259, 22));
+		customersLayerList.addActionListener(new java.awt.event.ActionListener() {
+			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				updateCustomersLayers();
+			}
+		});
+		jLblCustomersLayer = new javax.swing.JLabel();
+		jLblCustomersLayer.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+		jLblCustomersLayer.setBounds(new Rectangle(10, 24, 135, 20));
+		jLblCustomersLayer.setText("Customers Layer:");
 		
 		layerJPanel = new javax.swing.JPanel();
 		layerJPanel.setLayout(null);
 		layerJPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Layer"));
 		layerJPanel.setBounds(new Rectangle(14, 13, 468, 59));
-		layerJPanel.add(jLblLayerOrigins, null);
-		layerJPanel.add(cboLayerOrigins, null);
+		layerJPanel.add(jLblCustomersLayer, null);
+		layerJPanel.add(customersLayerList, null);
 		
 		// Origin - Destination Matrix section
 		// Selection options
@@ -244,26 +240,92 @@ public class ODMatrix extends JPanel {
 		return tabLayers;
 	}
 	
+	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		try {
+			// Updates the list of POINT Layers which represent the customers 
+			initializeCustomersLayers(Layers.getPointLayers(controlPanel.getMapContext()));
+		} catch (BaseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		// TODO: Is there anything that needs to be done?
+	}
 	
 	// Enable or disable the checkbox with auto tolerance
 	private void enableAutoTolerance (Boolean enabled){
 		chckbxAuto.setEnabled(enabled);
 	}
 	
-	// Enable or disable the tolerance related fields
+	/**
+	 * Enable or disable the tolerance related fields
+	 * @param enabled
+	 */
 	private void enableTolerance (Boolean enabled){
 		jLblTolerance.setEnabled(enabled);
 		txtTolerance.setEnabled(enabled);
 		jLblToleranceUnits.setEnabled(enabled);
 	}
 	
-	// Update the list of layers shown on the JComboBox
-	// Layers of type POINT or MULTIPOINT
-	// TODO: This method needs to be called when the user sees the JPanel to show the point layers
-	public void updateOriginsLayers(Vector<FLyrVect> arrayLayers){
-		cboLayerOriginsModel = new DefaultComboBoxModel(arrayLayers);
-		cboLayerOrigins.setModel(cboLayerOriginsModel);
-		cboLayerOrigins.setRenderer(new LayerListCellRenderer());
+	/**
+	 * Updates the list of layers shown on the JComboBox. Layers of type POINT or MULTIPOINT
+	 */
+	public void initializeCustomersLayers(Vector<FLyrVect> arrayLayers){
+//		DefaultComboBoxModel cboLayerOriginsModel = new DefaultComboBoxModel(arrayLayers);
+//		customersLayerList.setModel(cboLayerOriginsModel);
+//		customersLayerList.setRenderer(new LayerListCellRenderer());
+		
+		// Add the message to the user
+		customersLayerList.addItem(controlPanel._T("Choose_customers_layer"));
+		for (int i=0; i<arrayLayers.size(); i++){
+			// TODO: This doesn't work if the user has two layers with the same name.
+			// Add the layer's names
+			customersLayerList.addItem(arrayLayers.get(i).getName());
+		}
+	}
+	
+	/**
+	 * Change the selected customers layer
+	 */
+	private void updateCustomersLayers(){
+		int selectedLayerIndex = 0;
+		try{
+			// 1. Get the selected element
+			selectedLayerIndex = customersLayerList.getSelectedIndex();
+			
+			// 2. If it's not the default value 
+			if (selectedLayerIndex > 0){
+				// 2.1. Get the selected layer's name
+				String selectedLayerName = customersLayerList.getSelectedItem().toString();
+				
+				// 2.2. Verify that the selected layer has one or more fields, otherwise give an alert to the user 
+				customersLayer = (FLyrVect) controlPanel.getMapContext().getLayers().getLayer(selectedLayerName);
+
+				int nrOfFields = customersLayer.getRecordset().getFieldCount();
+				if (nrOfFields<1){
+					controlPanel.showMessageDialog ("Customers_layer_with_fewer_than_one_field");
+					// Then go to the default (first) option
+					// TODO: Should go to the previous selected layer
+					customersLayerList.setSelectedIndex(0);
+				} 
+			
+			// 3. If it is the default index just remove the previously selected layer
+			} else {
+				customersLayer = null;
+			}
+			
+		} catch (ReadDriverException ex){
+			ex.printStackTrace();
+		}
+
 	}
 	
     //Opens a cost matrix on a text file
@@ -357,18 +419,18 @@ public class ODMatrix extends JPanel {
 		Network net = VRPExtension.getNetwork();
 		
 		//Get the selected layer
-		layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+		customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
 		
 		//Put the flags on the network
 		if (autoTolerance==true){
 			try {
-				originFlags = putFlagsOnNetwork(layerOrigins, net); 
+				originFlags = putFlagsOnNetwork(customersLayer, net); 
 				flagsOnNet=true;
 			} catch (BaseException ex){
 				ex.printStackTrace();
 			}
 		} else {
-			originFlags = putFlagsOnNetwork(layerOrigins, net, maxTolerance); 
+			originFlags = putFlagsOnNetwork(customersLayer, net, maxTolerance); 
 			flagsOnNet=true;
 		}
 
@@ -431,9 +493,9 @@ public class ODMatrix extends JPanel {
 			selectedWriter = odMatrixWriters.get(getFileFormat());
 			
 			// Put the flags on the network
-			layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
+			customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
 			try {
-				originFlags = putFlagsOnNetwork(layerOrigins, net); 
+				originFlags = putFlagsOnNetwork(customersLayer, net); 
 			} catch (BaseException ex){
 				ex.printStackTrace();
 			}
@@ -455,8 +517,8 @@ long start = System.currentTimeMillis();
 			while (true){
 				try {
 					System.out.println("\nTrying to put flags on the network with a tolerance of "+tolerance);	
-					layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
-					originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins, net, tolerance);
+					customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
+					originFlags = NetworkUtils.putFlagsOnNetwork(customersLayer, net, tolerance);
 					long stop = System.currentTimeMillis();
 					System.out.println("Took "+ (stop-start) + "ms and it Worked!\n\n");	
 					return originFlags;
@@ -489,8 +551,8 @@ long start = System.currentTimeMillis();
 				long start = System.currentTimeMillis();
 				try {
 					System.out.println("\nTrying to put flags on the network with a tolerance of "+tolerance);	
-					layerOrigins = (FLyrVect) cboLayerOrigins.getSelectedItem();
-					originFlags = NetworkUtils.putFlagsOnNetwork(layerOrigins, net, tolerance);
+					customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
+					originFlags = NetworkUtils.putFlagsOnNetwork(customersLayer, net, tolerance);
 					long stop = System.currentTimeMillis();
 					System.out.println("Took "+ (stop-start) + "ms and to put all the flags with a tolerance of "+tolerance+"!\n\n");	
 					return originFlags;
@@ -546,7 +608,7 @@ long start = System.currentTimeMillis();
 	
 	// Returns the selected layer
 	public FLyrVect getLayerOrigins() {
-		return layerOrigins;
+		return customersLayer;
 	}
 	
 	// Returns the index of the file format

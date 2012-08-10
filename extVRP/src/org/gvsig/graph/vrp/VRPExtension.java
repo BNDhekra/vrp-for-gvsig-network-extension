@@ -41,21 +41,18 @@
 package org.gvsig.graph.vrp;
 
 import java.awt.Component;
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
 import org.gvsig.exceptions.BaseException;
-
-import org.gvsig.graph.*;
+import org.gvsig.graph.IODMatrixFileWriter;
+import org.gvsig.graph.ODMatrixFileWriter4cols;
+import org.gvsig.graph.ODMatrixFileWriter4cols_minutes_km;
+import org.gvsig.graph.ODMatrixFileWriterRFormat;
 import org.gvsig.graph.core.GraphException;
-import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.core.Network;
-import org.gvsig.graph.core.NetworkUtils;
-import org.gvsig.graph.gui.ODMatrixTask;
 import org.gvsig.graph.vrp.gui.VRPControlPanel;
-//import org.gvsig.graph.gui.OdMatrixControlPanel;
 
 import com.iver.andami.PluginServices;
 import com.iver.andami.plugins.Extension;
@@ -63,12 +60,11 @@ import com.iver.andami.ui.mdiManager.IWindow;
 import com.iver.cit.gvsig.fmap.MapContext;
 import com.iver.cit.gvsig.fmap.MapControl;
 import com.iver.cit.gvsig.fmap.layers.FLayer;
-import com.iver.cit.gvsig.fmap.layers.FLyrVect;
 import com.iver.cit.gvsig.fmap.layers.SingleLayerIterator;
 import com.iver.cit.gvsig.project.documents.view.gui.View;
 
 /**
- * @author Francisco José Peñarrubia (fjp@scolab.es)
+ * @author Francisco José Peñarrubia (fjp@scolab.es), David Pinheiro
  *
  * ODMatrixControlPanel sets selectedWriter to allow multiple export formats
  */

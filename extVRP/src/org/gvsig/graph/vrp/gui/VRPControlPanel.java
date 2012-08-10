@@ -100,7 +100,10 @@ public class VRPControlPanel extends JPanel implements IWindow {
 		this.extension=extension;
 		this.odMatrixWriters=odMatrixWriters;
 		this.network=net;
+		// Initializes the graphical interface
 		initComponents();
+		// Starts up the first tab
+		odmatrix.fromPreviousTab();
 	}
 
 	/**
@@ -180,48 +183,15 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	 */
 	
 	/**
-	 * Returns all the layers of type POINT and MULTIPOINT
-	 */
-	public Vector<FLyrVect> getPointLayers(MapContext mapContext) throws BaseException {
-		/** Layers currently on the workspace */
-		FLayers layers = mapContext.getLayers();
-		
-		/** Layer iterator */
-		LayersIterator it = new LayersIterator(layers);
-		
-		/** A vector of layers (of the type FLyrVect) */
-		Vector<FLyrVect> arrayLayers = new Vector<FLyrVect>();
-		
-		// Iterates through every layer on the workspace and puts the ones of type POINT or MULTIPOINT on an array
-		while (it.hasNext()) {
-			FLayer lyr = it.nextLayer();
-			if (!lyr.isAvailable())
-				continue;
-			if (lyr instanceof FLyrVect) {
-				FLyrVect lyrVect = (FLyrVect) lyr;
-				if ((lyrVect.getShapeType() == FShape.POINT)
-						|| (lyrVect.getShapeType() == FShape.MULTIPOINT))
-					arrayLayers.add(lyrVect);
-			}
-		}
-		
-		return arrayLayers;
-	}
-	
-	/**
-	 * 
+	 * Sets the MapContext, that represents the model and a part of the control and view
+	 * around graphical layers used by MapControl.
 	 * @param mapContext
 	 * @throws BaseException
 	 */
-	// TODO: Is this method really needed?
+	// Sets
 	public void setMapContext(MapContext mapContext) throws BaseException {
-		
+		// Set the map context
 		this.mapContext = mapContext;
-		
-		// If the object tabLayers is instantiated, update its layers
-		// TODO: First detect that the ODMatrix JPanel has been initialized with initTab, otherwise
-		// this will throw an exception? Or try to find a workaround
-			odmatrix.updateOriginsLayers(getPointLayers(mapContext));
 	}
 	
 	/**
