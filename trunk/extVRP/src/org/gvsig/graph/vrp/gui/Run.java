@@ -19,7 +19,7 @@ import com.iver.andami.PluginServices;
 import javax.swing.JToggleButton;
 
 //TODO: description of class
-public class Run implements Runnable{
+public class Run implements Runnable implements Tab {
 	
 	private VRPControlPanel controlPanel;	// The VRP Control Panel that called this object
 	private JPanel tabRun;
@@ -177,6 +177,20 @@ public class Run implements Runnable{
 		preview = new Results_Preview(controlPanel);
 		
 		return tabRun;
+	}
+	
+	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		
 	}
 	
 	// Run the algorithm, when we have all the needed objects in place (cost matrix, genes and GA parameters).

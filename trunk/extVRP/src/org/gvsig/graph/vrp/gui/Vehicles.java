@@ -40,7 +40,7 @@ import javax.swing.ButtonGroup;
 
 
 //TODO: description of class
-public class Vehicles {
+public class Vehicles implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private GeneList geneList;
@@ -215,6 +215,20 @@ public class Vehicles {
 		enableHeterogeneousFleetOptions(false);
 	
 		return tabVehicles;
+	}
+	
+	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		
 	}
 	
 	/**

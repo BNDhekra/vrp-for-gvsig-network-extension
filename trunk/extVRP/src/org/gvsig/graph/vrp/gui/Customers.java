@@ -3,33 +3,23 @@
 
 package org.gvsig.graph.vrp.gui;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.gvsig.graph.vrp.support.Nodes;
-import org.metavrp.GA.GeneList;
-import org.metavrp.VRP.Customer;
-import org.metavrp.VRP.Vehicle;
 
 import com.hardcode.gdbms.driver.exceptions.ReadDriverException;
 import com.hardcode.gdbms.engine.values.ValueWriter;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
 import com.iver.cit.gvsig.fmap.layers.SelectableDataSource;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.text.DefaultFormatterFactory;
-
-public class Customers {
+public class Customers implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
-	private GeneList geneList;
 	private Nodes nodes;
 	private JPanel tabCustomers;
 	private JComboBox<String> customersDemandComboBox;
@@ -172,6 +162,20 @@ public class Customers {
 	}
 	
 	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		
+	}
+	
+	/**
 	 * Grab the customers demands from the chosen table column and put them on an array.
 	 */
 	// TODO: Show to the user the list of registers who couldn't be cast to double.
@@ -209,9 +213,10 @@ public class Customers {
 					value = value.replaceAll("'", "");
 					customersDemand.add(Double.parseDouble(value));
 				} catch (NumberFormatException ex){
-					// If there are wrong values, get those items and  add 0 to the customer demand
+					// If there are wrong values, get those items and add 0 to the customer demand
 					wrongRegisters.add(i);
 					customersDemand.add((double) 0);
+					// TODO: 
 					System.out.println("Row " + i + " gave an error. It's original value was " + value);
 				} catch (ReadDriverException e) {
 					System.out.println("Read Driver Exception");
@@ -321,11 +326,6 @@ public class Customers {
 	/*
 	 * Getters and Setters
 	 */
-	
-	// Get the list of genes (vehicles and customers)
-	public GeneList getGeneList(){
-		return this.geneList;
-	}
 	
 	/**
 	 * Get the customers demands as doubles

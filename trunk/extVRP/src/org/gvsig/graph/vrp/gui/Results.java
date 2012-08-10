@@ -42,7 +42,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.JToggleButton;
 
 //TODO: description of class
-public class Results {
+public class Results implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabResults;
@@ -184,6 +184,20 @@ tglbtnPreview.setEnabled(false);
 		preview = new Results_Preview(controlPanel);
 		
 		return tabResults;
+	}
+	
+	/**
+	 * What should be done when the user comes from the previous tab.
+	 */
+	public void fromPreviousTab(){
+		
+	}
+	
+	/**
+	 * What should be done when the user comes from the next tab.
+	 */
+	public void fromNextTab(){
+		
 	}
 	
 	
