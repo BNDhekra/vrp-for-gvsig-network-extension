@@ -4,10 +4,7 @@ import java.util.ArrayList;
 
 import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.vrp.gui.VRPControlPanel;
-import org.metavrp.GA.Gene;
-import org.metavrp.GA.GeneList;
-import org.metavrp.VRP.Customer;
-import org.metavrp.VRP.Vehicle;
+import org.metavrp.algorithm.GA.Gene;
 
 import com.iver.cit.gvsig.fmap.core.IGeometry;
 

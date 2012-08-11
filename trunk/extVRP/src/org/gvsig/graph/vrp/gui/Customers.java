@@ -10,8 +10,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.gvsig.graph.vrp.support.Nodes;
-
 import com.hardcode.gdbms.driver.exceptions.ReadDriverException;
 import com.hardcode.gdbms.engine.values.ValueWriter;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
@@ -20,12 +18,11 @@ import com.iver.cit.gvsig.fmap.layers.SelectableDataSource;
 public class Customers implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
-	private Nodes nodes;
 	private JPanel tabCustomers;
 	private JComboBox<String> customersDemandComboBox;
 	
 	// The customer's demand
-	private ArrayList<Double> customersDemand;
+	private ArrayList<Float> customersDemand;
 		
 	// Constructor.
 	// Just initializes the Control Panel on witch this JPanel will be drawn.
@@ -77,7 +74,7 @@ public class Customers implements Tab {
 					ex.printStackTrace();
 				}
 			
-				grabCustomersDemand(selectedFieldIndex);
+				customersDemand = getCustomersDemand(selectedFieldIndex);
 			}
 		});
 		tabCustomers.add(customersDemandComboBox);
@@ -179,9 +176,9 @@ public class Customers implements Tab {
 	 * Grab the customers demands from the chosen table column and put them on an array.
 	 */
 	// TODO: Show to the user the list of registers who couldn't be cast to double.
-	public ArrayList<Double> grabCustomersDemand(int column){
+	public ArrayList<Float> getCustomersDemand(int column){
 		// The customers demands
-		customersDemand = new ArrayList<Double>();
+		ArrayList<Float> customersDemand = new ArrayList<Float>();
 		// The values that couldn't be cast do numeric ones
 		ArrayList<Integer> wrongRegisters = new ArrayList<Integer>();
 		
@@ -211,11 +208,11 @@ public class Customers implements Tab {
 				try {
 					value = dataSource.getFieldValue(i,column).getStringValue(ValueWriter.internalValueWriter);
 					value = value.replaceAll("'", "");
-					customersDemand.add(Double.parseDouble(value));
+					customersDemand.add(Float.parseFloat(value));
 				} catch (NumberFormatException ex){
 					// If there are wrong values, get those items and add 0 to the customer demand
 					wrongRegisters.add(i);
-					customersDemand.add((double) 0);
+					customersDemand.add((float) 0);
 					// TODO: 
 					System.out.println("Row " + i + " gave an error. It's original value was " + value);
 				} catch (ReadDriverException e) {
@@ -330,7 +327,7 @@ public class Customers implements Tab {
 	/**
 	 * Get the customers demands as doubles
 	 */
-	public ArrayList<Double> getCustomersDemand() {
+	public ArrayList<Float> getCustomersDemand() {
 		return customersDemand;
 	}
 	
@@ -345,7 +342,7 @@ public class Customers implements Tab {
 		}
 	
 		// Initialize the next tab 
-		controlPanel.getVehicles().initialSetup();
+		controlPanel.getVehicles().fromPreviousTab();
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
