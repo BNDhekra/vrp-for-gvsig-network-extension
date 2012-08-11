@@ -216,7 +216,8 @@ public class GA implements Tab {
 	 * What should be done when the user comes from the previous tab.
 	 */
 	public void fromPreviousTab(){
-		
+		// Update the problem size
+		setProblemSize(controlPanel.getODMatrix().getCostMatrix().getSize());
 	}
 	
 	/**

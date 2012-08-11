@@ -74,7 +74,6 @@ public class ODMatrix extends JPanel implements Tab {
 	private FileInputStream fstream;
 	private double maxTolerance=100000;
 	private CostMatrix costMatrix;
-	private int costMatrixSize;
 	private boolean flagsOnNet=false;
 	
 	static Logger logger = Logger.getLogger(NetworkUtils.class);
@@ -315,7 +314,7 @@ public class ODMatrix extends JPanel implements Tab {
 					// Then go to the default (first) option
 					// TODO: Should go to the previous selected layer
 					customersLayerList.setSelectedIndex(0);
-				} 
+				}
 			
 			// 3. If it is the default index just remove the previously selected layer
 			} else {
@@ -400,6 +399,9 @@ public class ODMatrix extends JPanel implements Tab {
 		
 		// Create the Distance Matrix
 		setCostMatrix(openCostMatrix(selectedFile));
+		
+		// Put the distance matrix on the library
+		controlPanel.getMetavrpProblem().setCostMatrix(costMatrix);
 		
 		// Update the list of possible fields of customer demands on the Customers tab.
 		// If it isn't successful, stay on this tab.
@@ -618,7 +620,6 @@ long start = System.currentTimeMillis();
 	
 	// Set the Cost Matrix and its size
 	public void setCostMatrix (CostMatrix costMatrix) {
-		this.costMatrixSize = costMatrix.getSize();
 		this.costMatrix = costMatrix;
 	}
 	
@@ -629,7 +630,7 @@ long start = System.currentTimeMillis();
 	
 	// Get the Size of the Cost Matrix
 	public int getCostMatrixSize() {
-		return this.costMatrixSize;
+		return this.costMatrix.getSize();
 	}
 
 	// Get the flags of the layer

@@ -6,10 +6,16 @@
 
 package org.gvsig.graph.vrp.gui;
 
-import java.io.*;
-import java.util.*;
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.cresques.cts.IProjection;
 import org.gvsig.exceptions.BaseException;
@@ -18,18 +24,14 @@ import org.gvsig.graph.core.Network;
 import org.gvsig.graph.vrp.VRPExtension;
 import org.gvsig.graph.vrp.support.Costs;
 import org.gvsig.graph.vrp.support.Nodes;
+import org.metavrp.Problem;
+import org.metavrp.algorithm.GeneticAlgorithm;
 
 import com.iver.andami.PluginServices;
 import com.iver.andami.ui.mdiManager.IWindow;
 import com.iver.andami.ui.mdiManager.WindowInfo;
-
-import com.iver.cit.gvsig.fmap.core.FShape;
 import com.iver.cit.gvsig.fmap.MapContext;
 import com.iver.cit.gvsig.fmap.MapControl;
-import com.iver.cit.gvsig.fmap.layers.FLayers;
-import com.iver.cit.gvsig.fmap.layers.FLyrVect;
-import com.iver.cit.gvsig.fmap.layers.LayersIterator;
-import com.iver.cit.gvsig.fmap.layers.FLayer;
 
 
 /**
@@ -64,6 +66,9 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	private Run run;
 	private Results results;
 
+	// metaVRP library objects
+	private Problem metavrpProblem;
+	private GeneticAlgorithm metavrpGA;
 
 	//	private JTextArea getTxtFormatAreaDescription() {
 //		if (txtFormatAreaDescription == null) {
@@ -300,6 +305,13 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	public String _T(String str) {
 		return PluginServices.getText(this, str);
 	}
-	
+
+	public Problem getMetavrpProblem() {
+		return metavrpProblem;
+	}
+
+	public GeneticAlgorithm getMetavrpGA() {
+		return metavrpGA;
+	}
 
 }

@@ -7,43 +7,36 @@ package org.gvsig.graph.vrp.gui;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.text.NumberFormatter;
 
-import org.gvsig.graph.core.Network;
 import org.gvsig.graph.vrp.support.Nodes;
-import org.metavrp.GA.*;
-import org.metavrp.GA.support.*;
-import org.metavrp.VRP.*;
+import org.metavrp.Problem;
+import org.metavrp.problem.Customer;
+import org.metavrp.problem.Depot;
+import org.metavrp.problem.Vehicle;
 
 import com.hardcode.gdbms.driver.exceptions.ReadDriverException;
 import com.iver.andami.PluginServices;
 import com.iver.andami.ui.mdiManager.IWindow;
 import com.iver.cit.gvsig.fmap.MapContext;
 import com.iver.cit.gvsig.fmap.layers.FLayer;
-import com.iver.cit.gvsig.fmap.layers.FLayers;
 import com.iver.cit.gvsig.fmap.layers.FLyrVect;
-import com.iver.cit.gvsig.fmap.layers.SelectableDataSource;
 import com.iver.cit.gvsig.fmap.layers.SingleLayerIterator;
-import com.iver.cit.gvsig.project.documents.table.gui.Table;
 import com.iver.cit.gvsig.project.documents.view.gui.View;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JFormattedTextField;
-import javax.swing.text.NumberFormatter;
-import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
 
 
 //TODO: description of class
 public class Vehicles implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
-	private GeneList geneList;
 	private Nodes nodes;
 	private JPanel tabVehicles;
 	private JTextField nVehicles;
@@ -221,7 +214,7 @@ public class Vehicles implements Tab {
 	 * What should be done when the user comes from the previous tab.
 	 */
 	public void fromPreviousTab(){
-		
+		initialSetup();
 	}
 	
 	/**
@@ -515,45 +508,63 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesCapacities.setEnabled(enable);
 	}
 	
-	// Create the list of possible genes (vehicles and customers) 
+	// Create the list of possible genes (vehicles, customers and depots)
 	// At the same time create the list of nodes.
-	public void createGeneListAndNodes(){
+	public void fillProblemAndNodes(){
 		// Initialize the nodes
 		nodes = new Nodes(controlPanel);
+		
+		// Get the Customers demands
+		ArrayList<Float> customersDemands = controlPanel.getCustomers().getCustomersDemand();
 		
 		// Create an ArrayList of the customers.
 		// The customers are all the nodes except the depot 
 		ArrayList<Customer> customers = new ArrayList<Customer>(); 
 		// Create an ArrayList of the vehicles.
 		ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>(); 
+		// Create an ArrayList of the depots.
+		
+		ArrayList<Depot> depots = new ArrayList<Depot>();
 		for (int i=0; i<controlPanel.getODMatrix().getCostMatrixSize(); i++){
 			Nodes.Node node = nodes.new Node();
 			// Add all the nodes to the customers list except the depot
 			if (i != getDepotNumber()){
-				Customer customer = new Customer(i,i);
+				Customer customer = new Customer(i,customersDemands.get(i));
 				customers.add(customer);
 				node.setGene(customer);
 				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
 			} else {
 				for (int j=1; j<=getNumVehicles(); j++){
 					// TODO: Change this to accommodate depots natively on the representation of the chromosome (in metaVRP).
-					Vehicle vehicle = new Vehicle(-j, getDepotNumber());
+					Vehicle vehicle = new Vehicle(getDepotNumber(),CAPACITY);
 					vehicles.add(vehicle);
-					node.setGene(vehicle);
-					node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
 				}
+				
+				// Create the depot
+				Depot depot = new Depot(i);
+
+				// Add the depot to the list of depots
+				depots.add(depot);
+				
+				// Put the Depot's node on the nodes
+				node.setGene(depot);
+				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
 			}
 			nodes.addNode(node);
 		}
 		
-		// The list of genes is now initialized
-		geneList = new GeneList(customers, vehicles);
+		// Put all this on the Problem class
+		Problem problem = controlPanel.getMetavrpProblem();
+		problem.setCustomers(customers);
+		problem.setVehicles(vehicles);
+		problem.setDepots(depots);
 	}
 	
 	
 	/*
 	 * Getters and Setters
 	 */
+	
 	// Get the number of the depot
 	public int getDepotNumber() {
 		return depotNumber;
@@ -564,23 +575,19 @@ public class Vehicles implements Tab {
 		return numVehicles;
 	}
 	
-	// Get the list of genes (vehicles and customers)
-	public GeneList getGeneList(){
-		return this.geneList;
-	}
 	
 	/*
 	 * "Next" and "Back" Buttons
 	 */
 	
-	// Get the variables (vehicles and depot) 
+	// Set the variables (customers, vehicles and depot) 
 	private void btnNextVehiclesActionPerformed(){
 		// Get number of vehicles
 		numVehicles=1;
 		try {
 			numVehicles = Integer.parseInt(nVehicles.getText());
 		} catch (NumberFormatException e) {
-			controlPanel.showMessageDialog ("Please_enter_a_valid_number");
+			controlPanel.showMessageDialog ("Enter_a_valid_number_of_vehicles");
 			return;
 		}
 		// Get the depot's node
@@ -588,17 +595,18 @@ public class Vehicles implements Tab {
 		try {
 			depotNumber = Integer.parseInt((String)depot.getSelectedItem());
 		} catch (NumberFormatException e) {
-			controlPanel.showMessageDialog ("Please_enter_a_valid_number");
+			controlPanel.showMessageDialog ("Enter_a_valid_depot_number");
 			return;
 		}
-
-		// Create an object with the list of genes (vehicles and customers) to use on the Genetic Algorithm
+		
+		// Create an object with the vrp problem definition
 		// The customers and depot need to go to the Nodes too
-		createGeneListAndNodes();
+		fillProblemAndNodes();
 		controlPanel.setNodes(nodes);
 		
-		// Update the problem size
-		controlPanel.getGA().setProblemSize(controlPanel.getODMatrix().getCostMatrix().getSize());
+		
+		// Get the vehicle's capacities
+		TODO
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
