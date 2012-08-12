@@ -57,8 +57,10 @@ public class Vehicles implements Tab {
 	private FLyrVect selectedLayer;
 	private JComboBox<String> comboBoxVehiclesId;
 	private String selectedIdField;
+	private ArrayList<String> idFieldValues;
 	private JComboBox<String> comboBoxVehiclesCapacities;
 	private String selectedCapacitiesField;
+	private ArrayList<Float> capacitiesFieldValues;
 	
 	// Constructor.
 	// Just initializes the Control Panel on witch this JPanel will be drawn.
@@ -178,7 +180,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesId.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					verifyIdField(comboBoxVehiclesId);
+					idFieldValues = getIdFieldValues(comboBoxVehiclesId);
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -196,7 +198,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesCapacities.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					verifyCapacitiesField(comboBoxVehiclesCapacities);
+					capacitiesFieldValues = getCapacitiesFieldValues(comboBoxVehiclesCapacities);
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -240,10 +242,10 @@ public class Vehicles implements Tab {
 		fillVehiclesLayers();
 		
 		// Fill the list of possible vehicles ids
-		cleanVehiclesIds();
+		cleanVehiclesIdsFields();
 		
 		// Fill the list of possible vehicles capacities
-		cleanVehiclesCapacities();
+		cleanVehiclesCapacitiesFields();
 	}
 	
 	
@@ -322,13 +324,13 @@ public class Vehicles implements Tab {
 				} 
 				
 				// 2.2. Update the fields
-				updateVehiclesIds(selectedLayer);
-				updateVehiclesCapacities(selectedLayer);
+				updateVehiclesIdsFields(selectedLayer);
+				updateVehiclesCapacitiesFields(selectedLayer);
 			
 			// 3. If it is the default index just put the options to the defaults
 			} else {
-				cleanVehiclesIds();
-				cleanVehiclesCapacities();
+				cleanVehiclesIdsFields();
+				cleanVehiclesCapacitiesFields();
 				selectedLayer = null;
 			}
 			
@@ -342,9 +344,9 @@ public class Vehicles implements Tab {
 	/**
 	 * Update the list of possible fields for vehicle's identification
 	 */
-	public void updateVehiclesIds(FLyrVect layer){
+	public void updateVehiclesIdsFields(FLyrVect layer){
 		// 1. Put the options to the default
-		cleanVehiclesIds();
+		cleanVehiclesIdsFields();
 		
 		// 2. Fill the options with the fields of the selected layer
 		try{
@@ -360,9 +362,9 @@ public class Vehicles implements Tab {
 	/**
 	 * Update the list of possible fields for the vehicles capacities
 	 */
-	public void updateVehiclesCapacities(FLyrVect layer){
+	public void updateVehiclesCapacitiesFields(FLyrVect layer){
 		// 1. Put the options to the default
-		cleanVehiclesCapacities();
+		cleanVehiclesCapacitiesFields();
 		
 		// 2. Fill the options with the fields of the selected layer
 		try{
@@ -378,7 +380,7 @@ public class Vehicles implements Tab {
 	/**
 	 * Put the possible values for the vehicles Ids to the default ones 
 	 */
-	public void cleanVehiclesIds(){
+	public void cleanVehiclesIdsFields(){
 		// 1. Remove all options
 		comboBoxVehiclesId.removeAllItems();
 		
@@ -389,7 +391,7 @@ public class Vehicles implements Tab {
 	/**
 	 * Put the possible values for the vehicles capacities to the default ones
 	 */
-	public void cleanVehiclesCapacities(){
+	public void cleanVehiclesCapacitiesFields(){
 		// 3.1. Remove all options
 		comboBoxVehiclesCapacities.removeAllItems();
 		
@@ -401,12 +403,23 @@ public class Vehicles implements Tab {
 	/**
 	 * Verifies if the chosen ID field is a suitable one.
 	 * It's suitable if there are no repeated values and no empty (or non-numeric) ones.
-	 * @throws ReadDriverException 
+	 * @param comboBoxVehiclesId
+	 * @throws ReadDriverException
 	 */
-	public void verifyIdField(JComboBox<String> comboBoxVehiclesId) throws ReadDriverException {
-		// 0. If it was selected the first field or if the layer wasn't chosen, just exit
+	public boolean isValidIdField() throws ReadDriverException {
+		return !idFieldValues.isEmpty();
+	}
+	
+	/**
+	 * Gets a list of vehicle ids from the chosen Layer's Field.
+	 * Returns an empty list (and shows user errors) in case of empty or repeated values.
+	 * @param comboBoxVehiclesId
+	 * @throws ReadDriverException
+	 */
+	public ArrayList<String> getIdFieldValues(JComboBox<String> comboBoxVehiclesId) throws ReadDriverException {
+		// 0. If the user selected the first field or if the layer wasn't chosen, return empty list
 		if (comboBoxVehiclesId.getSelectedIndex()<1 || selectedLayer==null){
-			return;
+			return new ArrayList<String>(0);
 		}
 		
 		// 1. Get the chosen option as a string
@@ -418,41 +431,48 @@ public class Vehicles implements Tab {
 		// 3. Verify if there are no repeated or empty values
 		// 3.1) Get the number of lines in the layer
 		long nrLines = selectedLayer.getRecordset().getRowCount();
-		// 3.2) Create a HashSet to store the read elements
-		HashSet<String> elements = new HashSet<String>();
-		// 3.3) get the elements one by one from the chosen field
+		// 3.2) Create a HashSet to verify repetitions on the read elements 
+		HashSet<String> bag = new HashSet<String>();
+		// 3.3) Create a list to store the read elements
+		ArrayList<String> idList = new ArrayList<String>();
+		// 3.4) Get the elements one by one from the chosen field
 		for (int i=0;i<nrLines;i++){
-			String element = selectedLayer.getRecordset().getFieldValue(i,column).toString().toLowerCase().trim();
+			String element = selectedLayer.getRecordset().getFieldValue(i,column).toString().trim();
 			// If there are any empty value, send warning to the user and get out of this
 			if (element.isEmpty()){
 				// Select the first option on the ComboBox
 				comboBoxVehiclesId.setSelectedIndex(0);
 				// Show error message
 				controlPanel.showMessageDialog ("Empty_values_in_id_field");
-				// Return
-				return;
+				// Return empty list
+				return new ArrayList<String>(0);
 			}
 			// Add element and if there are repeated ids, show warning and get out of this
-			if (!elements.add(element)){
+			if (!bag.add(element)){
 				// Select the first option on the ComboBox
 				comboBoxVehiclesId.setSelectedIndex(0);
 				// Show error message
 				controlPanel.showMessageDialog ("Repeated_values_in_id_field");
-				// Return
-				return;
+				// Return empty list
+				return new ArrayList<String>(0);
 			}
+			// If the element wasn't empty or repeated, add it to the list of ids
+			idList.add(element);
 		}
+		// Return the list
+		return idList;
 	}
 	
 	/**
+	 * 
 	 * Verifies if the chosen Capacity field is a suitable one.
 	 * It's suitable if there are no empty (or non-numeric) values
 	 * @throws ReadDriverException 
 	 */
-	public void verifyCapacitiesField(JComboBox<String> comboBoxVehiclesCapacities) throws ReadDriverException{
-		// 0. If it was selected the first field or if the layer wasn't chosen, just exit
+	public ArrayList<Float> getCapacitiesFieldValues(JComboBox<String> comboBoxVehiclesCapacities) throws ReadDriverException{
+		// 0. If it was selected the first field or if the layer wasn't chosen, just return an empty list
 		if (comboBoxVehiclesCapacities.getSelectedIndex()<1 || selectedLayer==null){
-			return;
+			return new ArrayList<Float>(0);
 		}
 		
 		// 1. Get the chosen option as a string
@@ -471,6 +491,7 @@ public class Vehicles implements Tab {
 			// The value will be treated as 0 and the vehicle will not be used.
 			if (element.isEmpty()){
 				// Show warning message
+				// TODO: should be shown only on time, not on every occurrence of an empty value
 				controlPanel.showMessageDialog ("Empty_values_in_capacity_field");
 			}
 			// If the read element can't be cast to float, show alert window.
@@ -508,8 +529,10 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesCapacities.setEnabled(enable);
 	}
 	
-	// Create the list of possible genes (vehicles, customers and depots)
-	// At the same time create the list of nodes.
+	/**
+	 * Set the customers, depots and vehicles on the problem definition.
+	 * At the same time create the list of nodes.
+	 */
 	public void fillProblemAndNodes(){
 		// Initialize the nodes
 		nodes = new Nodes(controlPanel);
@@ -534,15 +557,15 @@ public class Vehicles implements Tab {
 				node.setGene(customer);
 				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
 			} else {
+				// Add all the vehicles to the vehicles list
 				for (int j=1; j<=getNumVehicles(); j++){
-					// TODO: Change this to accommodate depots natively on the representation of the chromosome (in metaVRP).
-					Vehicle vehicle = new Vehicle(getDepotNumber(),CAPACITY);
+					Vehicle vehicle = new Vehicle(getDepotNumber(),getVehicleCapacity(j));
 					vehicles.add(vehicle);
 				}
 				
 				// Create the depot
 				Depot depot = new Depot(i);
-
+				
 				// Add the depot to the list of depots
 				depots.add(depot);
 				
@@ -572,9 +595,23 @@ public class Vehicles implements Tab {
 
 	// Get the number of vehicles
 	public int getNumVehicles() {
-		return numVehicles;
+		// 1. If the user chose an heterogeneous fleet, count the number of lines of the declared vehicle's table  
+		if (isHeterogeneousFleet()){
+			
+		} else {
+			// 2. If the user chose a homogeneous fleet just return the declared number of vehicles
+		}
+		
 	}
 	
+	/**
+	 * Is the chosen vehicle fleet Heterogeneous? 
+	 * By heterogeneous we mean that different vehicles can have different capacities.
+	 * @return True if the user chose an Heterogeneous fleet. False otherwise.
+	 */
+	public boolean isHeterogeneousFleet(){
+		return rdbtnHeterogeneousFleet.isSelected();
+	}
 	
 	/*
 	 * "Next" and "Back" Buttons
