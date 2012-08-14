@@ -39,14 +39,16 @@ public class Vehicles implements Tab {
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private Nodes nodes;
 	private JPanel tabVehicles;
+	private JLabel lblNOfVehicles;
 	private JTextField nVehicles;
+	private JLabel lblputIn;
 	private JComboBox<String> depot;
 	private int depotNumber;
 	private int numVehicles;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	
 	private JLabel lblVehicleCapacity;
-	private JTextField textField;
+	private JTextField nrHomogeneousVehicles;
 	private JLabel lblChooseVehiclesLayer;
 	private JLabel lblVehicleIdentification;
 	private JLabel lblVehiclesCapacities;
@@ -77,8 +79,8 @@ public class Vehicles implements Tab {
 		tabVehicles = new JPanel();
 		tabVehicles.setLayout(null);
 	
-		JLabel lblNOfVehicles = new JLabel("N\u00BA of vehicles:");
-		lblNOfVehicles.setBounds(63, 45, 70, 14);
+		lblNOfVehicles = new JLabel("N\u00BA of vehicles:");
+		lblNOfVehicles.setBounds(63, 84, 70, 14);
 		tabVehicles.add(lblNOfVehicles);
 		
 		// TODO: Test that this is working properly
@@ -88,16 +90,16 @@ public class Vehicles implements Tab {
 		nf.setAllowsInvalid(false);
 		nVehicles = new JFormattedTextField(nf);
 		nVehicles.setText("1");
-		nVehicles.setBounds(176, 42, 86, 20);
+		nVehicles.setBounds(176, 81, 86, 20);
 		tabVehicles.add(nVehicles);
 		nVehicles.setColumns(10);
 		
-		JLabel lblputIn = new JLabel("(Put 1 in case of a TSP)");
-		lblputIn.setBounds(272, 45, 112, 14);
+		lblputIn = new JLabel("(Put 1 in case of a TSP)");
+		lblputIn.setBounds(272, 84, 112, 14);
 		tabVehicles.add(lblputIn);
 		
 		JLabel lblDepotNode = new JLabel("Depot node:");
-		lblDepotNode.setBounds(63, 14, 70, 14);
+		lblDepotNode.setBounds(52, 14, 70, 14);
 		tabVehicles.add(lblDepotNode);
 		
 		depot = new JComboBox();
@@ -127,14 +129,14 @@ public class Vehicles implements Tab {
 		lblVehicleCapacity.setBounds(62, 112, 86, 17);
 		tabVehicles.add(lblVehicleCapacity);
 		
-		textField = new JTextField();
-		textField.setBounds(176, 110, 86, 20);
-		tabVehicles.add(textField);
-		textField.setColumns(10);
+		nrHomogeneousVehicles = new JTextField();
+		nrHomogeneousVehicles.setBounds(176, 110, 86, 20);
+		tabVehicles.add(nrHomogeneousVehicles);
+		nrHomogeneousVehicles.setColumns(10);
 		
 		rdbtnHomogeneousFleet = new JRadioButton("Homogeneous fleet");
 		buttonGroup.add(rdbtnHomogeneousFleet);
-		rdbtnHomogeneousFleet.setBounds(42, 83, 176, 23);
+		rdbtnHomogeneousFleet.setBounds(31, 54, 176, 23);
 		rdbtnHomogeneousFleet.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				enableHomogeneousFleetOptions(true);
@@ -147,7 +149,7 @@ public class Vehicles implements Tab {
 		
 		rdbtnHeterogeneousFleet = new JRadioButton("Heterogeneous fleet");
 		buttonGroup.add(rdbtnHeterogeneousFleet);
-		rdbtnHeterogeneousFleet.setBounds(42, 137, 176, 23);
+		rdbtnHeterogeneousFleet.setBounds(31, 137, 176, 23);
 		rdbtnHeterogeneousFleet.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				enableHomogeneousFleetOptions(false);
@@ -447,7 +449,7 @@ public class Vehicles implements Tab {
 				// Return empty list
 				return new ArrayList<String>(0);
 			}
-			// Add element and if there are repeated ids, show warning and get out of this
+			// Add element to the bag and if there are repeated ids, show warning and get out of this
 			if (!bag.add(element)){
 				// Select the first option on the ComboBox
 				comboBoxVehiclesId.setSelectedIndex(0);
@@ -464,9 +466,8 @@ public class Vehicles implements Tab {
 	}
 	
 	/**
-	 * 
-	 * Verifies if the chosen Capacity field is a suitable one.
-	 * It's suitable if there are no empty (or non-numeric) values
+	 * Gets the capacity values of all the vehicles.
+	 * It verifies if the chosen Capacity field is a suitable one. It's suitable if there are no empty (or non-numeric) values.
 	 * @throws ReadDriverException 
 	 */
 	public ArrayList<Float> getCapacitiesFieldValues(JComboBox<String> comboBoxVehiclesCapacities) throws ReadDriverException{
@@ -474,7 +475,7 @@ public class Vehicles implements Tab {
 		if (comboBoxVehiclesCapacities.getSelectedIndex()<1 || selectedLayer==null){
 			return new ArrayList<Float>(0);
 		}
-		
+
 		// 1. Get the chosen option as a string
 		String capacityField = (String) comboBoxVehiclesCapacities.getSelectedItem();
 		
@@ -484,28 +485,38 @@ public class Vehicles implements Tab {
 		// 3. Verify if there are no empty values
 		// 3.1) Get the number of lines in the layer
 		long nrLines = selectedLayer.getRecordset().getRowCount();
-		// 3.2) get the elements one by one from the chosen field
+		// 3.2) Create a list to store the read elements
+		ArrayList<Float> capacityList = new ArrayList<Float>();
+		// 3.3) Get the elements one by one from the chosen field
 		for (int i=0;i<nrLines;i++){
-			String element = selectedLayer.getRecordset().getFieldValue(i,column).toString().toLowerCase().trim();
+			String element = selectedLayer.getRecordset().getFieldValue(i,column).toString().trim();
 			// If there are any empty value, send warning to the user.
 			// The value will be treated as 0 and the vehicle will not be used.
 			if (element.isEmpty()){
 				// Show warning message
 				// TODO: should be shown only on time, not on every occurrence of an empty value
 				controlPanel.showMessageDialog ("Empty_values_in_capacity_field");
-			}
-			// If the read element can't be cast to float, show alert window.
-			try{
-				Float.valueOf(element);
-			} catch (NumberFormatException ex){
-				// Select the first option on the ComboBox
-				comboBoxVehiclesCapacities.setSelectedIndex(0);
-				// Show error message
-				controlPanel.showMessageDialog ("Nonnumeric_values_in_capacity_field");
-				// Return
-				return;
+				// Add capacity 0 (zero) to the vehicle
+				capacityList.add(0f);
+			} else {
+				// If the read element can't be cast to float, show alert window and return an empty list
+				Float capacity;
+				try{
+					capacity = Float.valueOf(element);
+				} catch (NumberFormatException ex){
+					// Select the first option on the ComboBox
+					comboBoxVehiclesCapacities.setSelectedIndex(0);
+					// Show error message
+					controlPanel.showMessageDialog ("Nonnumeric_values_in_capacity_field");
+					// Return empty list
+					return new ArrayList<Float>(0);
+				}
+				// If the read element is a float, add it to the list
+				capacityList.add(capacity);
 			}
 		}
+		// Return the list of capacities
+		return capacityList;
 	}
 	
 	
@@ -514,7 +525,10 @@ public class Vehicles implements Tab {
 	 */
 	public void enableHomogeneousFleetOptions(boolean enable){
 		lblVehicleCapacity.setEnabled(enable);
-		textField.setEnabled(enable);
+		nrHomogeneousVehicles.setEnabled(enable);
+		nVehicles.setEnabled(enable);
+		lblNOfVehicles.setEnabled(enable);
+		lblputIn.setEnabled(enable);
 	}
 	
 	/**
@@ -559,6 +573,7 @@ public class Vehicles implements Tab {
 			} else {
 				// Add all the vehicles to the vehicles list
 				for (int j=1; j<=getNumVehicles(); j++){
+					// TODO: If the vehicle's capacity is 0 (zero) it shouldn't be used at all
 					Vehicle vehicle = new Vehicle(getDepotNumber(),getVehicleCapacity(j));
 					vehicles.add(vehicle);
 				}
@@ -595,13 +610,49 @@ public class Vehicles implements Tab {
 
 	// Get the number of vehicles
 	public int getNumVehicles() {
+		int num_vehicles=0;
 		// 1. If the user chose an heterogeneous fleet, count the number of lines of the declared vehicle's table  
 		if (isHeterogeneousFleet()){
+			// 1.1. Get the selected layer index
+			int selectedLayerIndex = comboBoxVehiclesLayer.getSelectedIndex();
 			
+			// 1.2. If it's not the default value 
+			if (selectedLayerIndex > 0){
+				// 2.1. Get the selected layer's name
+				String selectedLayerName = comboBoxVehiclesLayer.getSelectedItem().toString();
+				
+				// 2.2. Get the selected layer
+				FLyrVect selectedLayer = (FLyrVect) controlPanel.getMapContext().getLayers().getLayer(selectedLayerName);
+
+				// 2.3. Get the number of rows
+				long nrOfRows = 0;
+				try {
+					nrOfRows = selectedLayer.getRecordset().getRowCount();
+				} catch (ReadDriverException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				// 2.4. The number of rows is the number of vehicles
+				num_vehicles = (int) nrOfRows;
+			
+			// 3. If it is the default index, return 0 (zero)
+			} else {
+				num_vehicles=0;
+			}
 		} else {
-			// 2. If the user chose a homogeneous fleet just return the declared number of vehicles
+		// 2. If the user chose a homogeneous fleet, just return the declared number of vehicles
+			try{
+				num_vehicles = Integer.parseInt(nrHomogeneousVehicles.getText());
+			} catch (Exception ex){
+				controlPanel.showMessageDialog("Empty_nr_homogeneous_vehicles");
+			}
 		}
-		
+		return num_vehicles;
+	}
+	
+	public float getVehicleCapacity(int nrVehicle){
+		return 
 	}
 	
 	/**
@@ -619,15 +670,7 @@ public class Vehicles implements Tab {
 	
 	// Set the variables (customers, vehicles and depot) 
 	private void btnNextVehiclesActionPerformed(){
-		// Get number of vehicles
-		numVehicles=1;
-		try {
-			numVehicles = Integer.parseInt(nVehicles.getText());
-		} catch (NumberFormatException e) {
-			controlPanel.showMessageDialog ("Enter_a_valid_number_of_vehicles");
-			return;
-		}
-		// Get the depot's node
+		// 1. Get the depot's node
 		depotNumber=0;
 		try {
 			depotNumber = Integer.parseInt((String)depot.getSelectedItem());
@@ -636,14 +679,24 @@ public class Vehicles implements Tab {
 			return;
 		}
 		
+		// 2. If it's an homogeneous fleet
+		if (rdbtnHomogeneousFleet.isSelected()){
+			// 2.1 Get the number of vehicles
+			getNrOfVehicles();
+			// 2.2 Get vehicle's capacity
+			getVehiclesCapacity();
+		} else {
+		// 3. If it's an heterogeneous fleet
+			// 3.1 Get the list of vehicle's IDs
+			
+			// 3.2 Get the list of vehicle's capacities
+			
+		}
+		
 		// Create an object with the vrp problem definition
 		// The customers and depot need to go to the Nodes too
 		fillProblemAndNodes();
 		controlPanel.setNodes(nodes);
-		
-		
-		// Get the vehicle's capacities
-		TODO
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
