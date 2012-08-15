@@ -51,7 +51,7 @@ public class ODMatrix extends JPanel implements Tab {
 	private ArrayList<IODMatrixFileWriter> odMatrixWriters;
 	private FLyrVect customersLayer;
 	private GvFlag[] originFlags;
-	private JComboBox<String> customersLayerList;
+	private JComboBox customersLayerList;
 	private JLabel jLblCustomersLayer;
 	private JPanel layerJPanel;
 	private JRadioButton opt1, opt2;
@@ -94,7 +94,7 @@ public class ODMatrix extends JPanel implements Tab {
 		
 		// Layer section
 		// POINT or MULTIPOINT Layer 
-		customersLayerList = new javax.swing.JComboBox<String>();
+		customersLayerList = new javax.swing.JComboBox();
 		customersLayerList.setBounds(new Rectangle(151, 23, 259, 22));
 		customersLayerList.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
