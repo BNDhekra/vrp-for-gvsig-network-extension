@@ -4,31 +4,26 @@
 package org.gvsig.graph.vrp.gui;
 
 //Needed imports
-import java.util.ArrayList;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
-import org.metavrp.GA.*;
-import org.metavrp.GA.operators.OperatorsAndParameters;
-import org.metavrp.GA.support.*;
-import org.metavrp.VRP.*;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import java.awt.GridLayout;
-import javax.swing.SwingConstants;
-import javax.swing.JComboBox;
-import java.awt.FlowLayout;
-import javax.swing.DefaultComboBoxModel;
+import org.metavrp.algorithm.GA.VRPGARun;
+import org.metavrp.algorithm.GA.operators.OperatorsAndParameters;
+import org.metavrp.problem.CostMatrix;
 
 //TODO: description of class
 public class GA implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabGA;
-	private OperatorsAndParameters params;
+	private org.metavrp.algorithm.GA.operators.OperatorsAndParameters params;
 	private ButtonGroup buttonGroup;
 	private JTextField textField;
 	private JTextField textField_1;

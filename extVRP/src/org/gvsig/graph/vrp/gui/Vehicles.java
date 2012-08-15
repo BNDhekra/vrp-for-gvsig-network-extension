@@ -40,15 +40,14 @@ public class Vehicles implements Tab {
 	private Nodes nodes;
 	private JPanel tabVehicles;
 	private JLabel lblNOfVehicles;
-	private JTextField nVehicles;
+	private JTextField nrHomogeneousVehicles;
 	private JLabel lblputIn;
 	private JComboBox<String> depot;
 	private int depotNumber;
-	private int numVehicles;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	
 	private JLabel lblVehicleCapacity;
-	private JTextField nrHomogeneousVehicles;
+	private JTextField homogeneousVehiclesCapacity;
 	private JLabel lblChooseVehiclesLayer;
 	private JLabel lblVehicleIdentification;
 	private JLabel lblVehiclesCapacities;
@@ -64,8 +63,12 @@ public class Vehicles implements Tab {
 	private String selectedCapacitiesField;
 	private ArrayList<Float> capacitiesFieldValues;
 	
-	// Constructor.
-	// Just initializes the Control Panel on witch this JPanel will be drawn.
+
+	/**
+	 * Constructor.
+	 * Just initializes the Control Panel on witch this JPanel will be drawn.
+	 * @param controlPanel The VRP Control Panel
+	 */
 	public Vehicles(VRPControlPanel controlPanel) {
 		this.controlPanel = controlPanel;
 	}
@@ -84,15 +87,15 @@ public class Vehicles implements Tab {
 		tabVehicles.add(lblNOfVehicles);
 		
 		// TODO: Test that this is working properly
-		nVehicles = new JFormattedTextField();
+		nrHomogeneousVehicles = new JFormattedTextField();
 		NumberFormatter nf = new NumberFormatter(); // in javax.swing.text
 		nf.setMinimum(new Long(1));
 		nf.setAllowsInvalid(false);
-		nVehicles = new JFormattedTextField(nf);
-		nVehicles.setText("1");
-		nVehicles.setBounds(176, 81, 86, 20);
-		tabVehicles.add(nVehicles);
-		nVehicles.setColumns(10);
+		nrHomogeneousVehicles = new JFormattedTextField(nf);
+		nrHomogeneousVehicles.setText("1");
+		nrHomogeneousVehicles.setBounds(176, 81, 86, 20);
+		tabVehicles.add(nrHomogeneousVehicles);
+		nrHomogeneousVehicles.setColumns(10);
 		
 		lblputIn = new JLabel("(Put 1 in case of a TSP)");
 		lblputIn.setBounds(272, 84, 112, 14);
@@ -129,10 +132,10 @@ public class Vehicles implements Tab {
 		lblVehicleCapacity.setBounds(62, 112, 86, 17);
 		tabVehicles.add(lblVehicleCapacity);
 		
-		nrHomogeneousVehicles = new JTextField();
-		nrHomogeneousVehicles.setBounds(176, 110, 86, 20);
-		tabVehicles.add(nrHomogeneousVehicles);
-		nrHomogeneousVehicles.setColumns(10);
+		homogeneousVehiclesCapacity = new JTextField();
+		homogeneousVehiclesCapacity.setBounds(176, 110, 86, 20);
+		tabVehicles.add(homogeneousVehiclesCapacity);
+		homogeneousVehiclesCapacity.setColumns(10);
 		
 		rdbtnHomogeneousFleet = new JRadioButton("Homogeneous fleet");
 		buttonGroup.add(rdbtnHomogeneousFleet);
@@ -182,7 +185,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesId.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					idFieldValues = getIdFieldValues(comboBoxVehiclesId);
+					idFieldValues = getHeterogeneousVehiclesIds();
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -200,7 +203,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesCapacities.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					capacitiesFieldValues = getCapacitiesFieldValues(comboBoxVehiclesCapacities);
+					capacitiesFieldValues = getHeterogeneousVehiclesCapacities();
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -218,6 +221,8 @@ public class Vehicles implements Tab {
 	 * What should be done when the user comes from the previous tab.
 	 */
 	public void fromPreviousTab(){
+		// TODO: If the user goes back to the previous tab and then again to this one,
+		//the chosen options shouldn't be lost, so this method shouldn't be called
 		initialSetup();
 	}
 	
@@ -230,17 +235,13 @@ public class Vehicles implements Tab {
 	
 	/**
 	 * Initialize the options
-	 * 
 	 */
-	// TODO: Verify if we can memorize the users chosen options. If he goes back to the previous tab and then again to this one,
-	//the chosen options shouldn't be lost 
 	public void initialSetup(){
 		// Update the list of options (the list of possible nodes) for the depot
+		// TODO: Only if the user has changed the Customer's layer
 		updateDepotOptions();
 		
 		// Fill the list of possible vehicle's layers
-		// TODO: If the user goes back from a next tab, to the previous one, without changing any option,
-		// these comboBoxes should stay with the already chosen options. They shouldn't be initalized again.
 		fillVehiclesLayers();
 		
 		// Fill the list of possible vehicles ids
@@ -400,25 +401,15 @@ public class Vehicles implements Tab {
 		// 3.2. Put just the default one
 		comboBoxVehiclesCapacities.addItem(controlPanel._T("Choose_vehicles_capacities_field"));
 	}
-	
-	
-	/**
-	 * Verifies if the chosen ID field is a suitable one.
-	 * It's suitable if there are no repeated values and no empty (or non-numeric) ones.
-	 * @param comboBoxVehiclesId
-	 * @throws ReadDriverException
-	 */
-	public boolean isValidIdField() throws ReadDriverException {
-		return !idFieldValues.isEmpty();
-	}
+
 	
 	/**
 	 * Gets a list of vehicle ids from the chosen Layer's Field.
 	 * Returns an empty list (and shows user errors) in case of empty or repeated values.
-	 * @param comboBoxVehiclesId
 	 * @throws ReadDriverException
 	 */
-	public ArrayList<String> getIdFieldValues(JComboBox<String> comboBoxVehiclesId) throws ReadDriverException {
+	public ArrayList<String> getHeterogeneousVehiclesIds() throws ReadDriverException {
+		
 		// 0. If the user selected the first field or if the layer wasn't chosen, return empty list
 		if (comboBoxVehiclesId.getSelectedIndex()<1 || selectedLayer==null){
 			return new ArrayList<String>(0);
@@ -470,7 +461,7 @@ public class Vehicles implements Tab {
 	 * It verifies if the chosen Capacity field is a suitable one. It's suitable if there are no empty (or non-numeric) values.
 	 * @throws ReadDriverException 
 	 */
-	public ArrayList<Float> getCapacitiesFieldValues(JComboBox<String> comboBoxVehiclesCapacities) throws ReadDriverException{
+	public ArrayList<Float> getHeterogeneousVehiclesCapacities() throws ReadDriverException{
 		// 0. If it was selected the first field or if the layer wasn't chosen, just return an empty list
 		if (comboBoxVehiclesCapacities.getSelectedIndex()<1 || selectedLayer==null){
 			return new ArrayList<Float>(0);
@@ -522,17 +513,19 @@ public class Vehicles implements Tab {
 	
 	/**
 	 * Hides the options related to the homogeneous fleet
+	 * @param enable Enable the various homogeneous fleet options?
 	 */
 	public void enableHomogeneousFleetOptions(boolean enable){
 		lblVehicleCapacity.setEnabled(enable);
+		homogeneousVehiclesCapacity.setEnabled(enable);
 		nrHomogeneousVehicles.setEnabled(enable);
-		nVehicles.setEnabled(enable);
 		lblNOfVehicles.setEnabled(enable);
 		lblputIn.setEnabled(enable);
 	}
 	
 	/**
 	 * Hides the options related to the heterogeneous fleet
+	 * @param enable Enable the various heterogeneous fleet options?
 	 */
 	public void enableHeterogeneousFleetOptions(boolean enable){
 		lblChooseVehiclesLayer.setEnabled(enable);
@@ -546,8 +539,10 @@ public class Vehicles implements Tab {
 	/**
 	 * Set the customers, depots and vehicles on the problem definition.
 	 * At the same time create the list of nodes.
+	 * @param vehiclesIds
+	 * @param vehiclesCapacities
 	 */
-	public void fillProblemAndNodes(){
+	public void fillProblemAndNodes(ArrayList<String> vehiclesIds, ArrayList<Float> vehiclesCapacities){
 		// Initialize the nodes
 		nodes = new Nodes(controlPanel);
 		
@@ -560,9 +555,11 @@ public class Vehicles implements Tab {
 		// Create an ArrayList of the vehicles.
 		ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>(); 
 		// Create an ArrayList of the depots.
-		
 		ArrayList<Depot> depots = new ArrayList<Depot>();
+		
+		// Iterate through every element of the Origin-Destination Matrix
 		for (int i=0; i<controlPanel.getODMatrix().getCostMatrixSize(); i++){
+			// Create a new node
 			Nodes.Node node = nodes.new Node();
 			// Add all the nodes to the customers list except the depot
 			if (i != getDepotNumber()){
@@ -572,9 +569,9 @@ public class Vehicles implements Tab {
 				node.setFlag(controlPanel.getODMatrix().getOriginFlags()[i]);
 			} else {
 				// Add all the vehicles to the vehicles list
-				for (int j=1; j<=getNumVehicles(); j++){
+				for (int j=0; j<vehiclesIds.size(); j++){
 					// TODO: If the vehicle's capacity is 0 (zero) it shouldn't be used at all
-					Vehicle vehicle = new Vehicle(getDepotNumber(),getVehicleCapacity(j));
+					Vehicle vehicle = new Vehicle(getDepotNumber(),vehiclesCapacities.get(j));
 					vehicles.add(vehicle);
 				}
 				
@@ -591,7 +588,7 @@ public class Vehicles implements Tab {
 			nodes.addNode(node);
 		}
 		
-		// Put all this on the Problem class
+		// Put all this on the Problem class which already has the Cost Matrix added
 		Problem problem = controlPanel.getMetavrpProblem();
 		problem.setCustomers(customers);
 		problem.setVehicles(vehicles);
@@ -608,11 +605,15 @@ public class Vehicles implements Tab {
 		return depotNumber;
 	}
 
-	// Get the number of vehicles
+	/**
+	 * Get the number of vehicles
+	 * @return The number of vehicles
+	 */
+	// TODO: Remove this (apparently unnecessary) method
 	public int getNumVehicles() {
 		int num_vehicles=0;
 		// 1. If the user chose an heterogeneous fleet, count the number of lines of the declared vehicle's table  
-		if (isHeterogeneousFleet()){
+		if (!isHomogeneousFleet()){
 			// 1.1. Get the selected layer index
 			int selectedLayerIndex = comboBoxVehiclesLayer.getSelectedIndex();
 			
@@ -643,7 +644,7 @@ public class Vehicles implements Tab {
 		} else {
 		// 2. If the user chose a homogeneous fleet, just return the declared number of vehicles
 			try{
-				num_vehicles = Integer.parseInt(nrHomogeneousVehicles.getText());
+				num_vehicles = getNumHomogeneousVehicles();
 			} catch (Exception ex){
 				controlPanel.showMessageDialog("Empty_nr_homogeneous_vehicles");
 			}
@@ -651,25 +652,48 @@ public class Vehicles implements Tab {
 		return num_vehicles;
 	}
 	
-	public float getVehicleCapacity(int nrVehicle){
-		return 
+	/**
+	 * Get the number of vehicles, as defined on the homogeneous fleet
+	 * @return The number of vehicles, as defined on the homogeneous fleet
+	 * @throws NumberFormatException
+	 */
+	public int getNumHomogeneousVehicles() throws NumberFormatException{
+		return Integer.parseInt(homogeneousVehiclesCapacity.getText());
 	}
 	
 	/**
-	 * Is the chosen vehicle fleet Heterogeneous? 
-	 * By heterogeneous we mean that different vehicles can have different capacities.
-	 * @return True if the user chose an Heterogeneous fleet. False otherwise.
+	 * Get the capacity of the vehicles on the homogeneous fleet 
+	 * @return The capacity of the vehicles, as defined on the homogeneous fleet
+	 * @throws NumberFormatException
 	 */
-	public boolean isHeterogeneousFleet(){
-		return rdbtnHeterogeneousFleet.isSelected();
+	public float getHomogeneousVehiclesCapacity() throws NumberFormatException{
+		return Float.parseFloat(homogeneousVehiclesCapacity.getText());
+	}
+	
+	/**
+	 * Is the chosen vehicle fleet Homogeneous? 
+	 * By homogeneous we mean that all the vehicles have the same capacity.
+	 * @return True if the user chose an Homogeneous fleet. False otherwise.
+	 */
+	public boolean isHomogeneousFleet(){
+		return rdbtnHomogeneousFleet.isSelected();
 	}
 	
 	/*
 	 * "Next" and "Back" Buttons
 	 */
-	
-	// Set the variables (customers, vehicles and depot) 
+	/**
+	 * The action performed by the "Next" button.
+	 * Sets the Problem related variables (Cost Matrix, Customers, Vehicles and Depot) 
+	 */
 	private void btnNextVehiclesActionPerformed(){
+		// The number of vehicles
+		int num_vehicles;
+		// The list of vehicle's IDs
+		ArrayList<String> vehiclesIds = new ArrayList<String>();
+		// The list of vehicle's capacities
+		ArrayList<Float> vehiclesCapacities = new ArrayList<Float>();
+		
 		// 1. Get the depot's node
 		depotNumber=0;
 		try {
@@ -680,29 +704,62 @@ public class Vehicles implements Tab {
 		}
 		
 		// 2. If it's an homogeneous fleet
-		if (rdbtnHomogeneousFleet.isSelected()){
+		if (isHomogeneousFleet()){
+			
 			// 2.1 Get the number of vehicles
-			getNrOfVehicles();
+			try{
+				num_vehicles = getNumHomogeneousVehicles();
+			} catch (Exception ex){
+				// Show alert message
+				controlPanel.showMessageDialog("Empty_nr_homogeneous_vehicles");
+				// Return from this method. Continues only when the user corrects the input values
+				return;
+			}
+			
 			// 2.2 Get vehicle's capacity
-			getVehiclesCapacity();
+			float homogeneousCapacity;
+			try{
+				homogeneousCapacity = getHomogeneousVehiclesCapacity();
+			} catch (Exception ex){
+				controlPanel.showMessageDialog("Empty_homogeneous_capacity_value");
+				// Return from this method. Continues only when the user corrects the input values
+				return;
+			}
+			
+			// 2.3 Fill the 2 lists. One for the vehicle's IDs, other for the vehicle's capacities
+			for (int i=0;i<num_vehicles;i++){
+				vehiclesIds.add("Vehicle "+i);
+				vehiclesCapacities.add(homogeneousCapacity);
+			}
 		} else {
 		// 3. If it's an heterogeneous fleet
-			// 3.1 Get the list of vehicle's IDs
 			
-			// 3.2 Get the list of vehicle's capacities
-			
+			// 3.1 If the list of IDs is empty it's because the user didn't chose a field from the list
+			if (idFieldValues.isEmpty()){
+				controlPanel.showMessageDialog ("Choose_vehicles_id_field");
+				return;
+			} 
+
+			// 3.2 If the list of Capacities is empty it's because the user didn't chose a field from the list
+			if (capacitiesFieldValues.isEmpty()){
+				controlPanel.showMessageDialog ("Choose_vehicles_capacities_field");
+				return;
+			} 
 		}
 		
 		// Create an object with the vrp problem definition
 		// The customers and depot need to go to the Nodes too
-		fillProblemAndNodes();
+		fillProblemAndNodes(vehiclesIds, vehiclesCapacities);
 		controlPanel.setNodes(nodes);
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
 	}
 
-	// Just go to the previous tab
+	/**
+	 * The action performed by the "Back" or "Undo" button.
+	 * Go to the previous tab.
+	 */
 	private void btnPreviousVehiclesActionPerformed(){
 		controlPanel.switchToPreviousTab();
 	}
