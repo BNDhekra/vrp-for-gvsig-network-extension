@@ -5,21 +5,22 @@ package org.gvsig.graph.vrp.gui;
 
 //Needed imports
 import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
 
-import org.metavrp.GA.*;
-import org.metavrp.GA.support.*;
-import org.metavrp.VRP.*;
+import org.metavrp.algorithm.GA.Chromosome;
+import org.metavrp.algorithm.GA.Population;
+import org.metavrp.algorithm.GA.VRPGARun;
 
+import org.gvsig.graph.vrp.gui.Tab;
 import com.iver.andami.PluginServices;
 
-import javax.swing.JToggleButton;
-
 //TODO: description of class
-public class Run implements Runnable implements Tab {
+// TODO: The GA seems to be a little slow... What's happening?
+public class Run implements Runnable, Tab {
 	
 	private VRPControlPanel controlPanel;	// The VRP Control Panel that called this object
 	private JPanel tabRun;
@@ -57,7 +58,7 @@ public class Run implements Runnable implements Tab {
 		// Statistics area
 		JPanel statsJPanel = new JPanel();
 		statsJPanel.setBorder(new TitledBorder(null, "Statistics", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		statsJPanel.setBounds(10, 11, 457, 97);
+		statsJPanel.setBounds(10, 11, 457, 90);
 		tabRun.add(statsJPanel);
 		statsJPanel.setLayout(null);
 		
@@ -68,67 +69,68 @@ public class Run implements Runnable implements Tab {
 		
 		JLabel lblBest = new JLabel("Best value:");
 		lblBest.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblBest.setBounds(40, 39, 70, 14);
+		lblBest.setBounds(40, 44, 70, 14);
 		statsJPanel.add(lblBest);
 		
 		JLabel lblAverage = new JLabel("Average value:");
 		lblAverage.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblAverage.setBounds(26, 53, 84, 14);
+		lblAverage.setBounds(26, 63, 84, 14);
 		statsJPanel.add(lblAverage);
 		
 		JLabel lblWorst = new JLabel("Worst value:");
 		lblWorst.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblWorst.setBounds(40, 68, 70, 14);
-		statsJPanel.add(lblWorst);
+		lblWorst.setBounds(40, 83, 70, 14);
+//		statsJPanel.add(lblWorst);
 		
 		generationLabel = new JLabel("");
 		generationLabel.setBounds(120, 25, 104, 14);
 		statsJPanel.add(generationLabel);
 		
 		bestLabel = new JLabel("");
-		bestLabel.setBounds(120, 39, 104, 14);
+		bestLabel.setBounds(120, 44, 104, 14);
 		statsJPanel.add(bestLabel);
 		
 		averageLabel = new JLabel("");
-		averageLabel.setBounds(120, 53, 104, 14);
+		averageLabel.setBounds(120, 63, 104, 14);
 		statsJPanel.add(averageLabel);
 		
 		worstLabel = new JLabel("");
 		worstLabel.setBounds(120, 68, 104, 14);
-		statsJPanel.add(worstLabel);
+//		statsJPanel.add(worstLabel);
 		
 		JLabel lblBestValueImprovement = new JLabel("Best value improvement:");
 		lblBestValueImprovement.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblBestValueImprovement.setBounds(255, 39, 125, 14);
+		lblBestValueImprovement.setBounds(255, 44, 125, 14);
 		statsJPanel.add(lblBestValueImprovement);
 		
-		JLabel lblNewLabel = new JLabel("Average value improvement:");
-		lblNewLabel.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblNewLabel.setBounds(234, 53, 146, 14);
-		statsJPanel.add(lblNewLabel);
+		JLabel lblAverageValueImprovement = new JLabel("Average value improvement:");
+		lblAverageValueImprovement.setHorizontalAlignment(SwingConstants.TRAILING);
+		lblAverageValueImprovement.setBounds(234, 63, 146, 14);
+		statsJPanel.add(lblAverageValueImprovement);
 		
 		JLabel lblNewLabel_1 = new JLabel("Worst value improvement:");
 		lblNewLabel_1.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblNewLabel_1.setBounds(244, 68, 136, 14);
-		statsJPanel.add(lblNewLabel_1);
+		lblNewLabel_1.setBounds(244, 83, 136, 14);
+//		statsJPanel.add(lblNewLabel_1);
 		
 		bestImprovementLabel = new JLabel("");
-		bestImprovementLabel.setBounds(384, 39, 63, 14);
+		bestImprovementLabel.setBounds(384, 44, 63, 14);
 		statsJPanel.add(bestImprovementLabel);
 		
 		averageImprovementLabel = new JLabel("");
-		averageImprovementLabel.setBounds(384, 53, 63, 14);
+		averageImprovementLabel.setBounds(384, 63, 63, 14);
 		statsJPanel.add(averageImprovementLabel);
 		
 		worstImprovementLabel = new JLabel("");
 		worstImprovementLabel.setBounds(384, 68, 63, 14);
-		statsJPanel.add(worstImprovementLabel);
+//		statsJPanel.add(worstImprovementLabel);
 		
 		// Graphic area
 		JPanel graphJPanel = new JPanel();
 		graphJPanel.setBorder(new TitledBorder(null, "Graphic", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		graphJPanel.setBounds(10, 119, 457, 103);
-		tabRun.add(graphJPanel);
+// TODO: Add this panel
+//		tabRun.add(graphJPanel);
 		graphJPanel.setLayout(null);
 		
 		// Button "Stop"/"Next >>"
@@ -171,8 +173,9 @@ public class Run implements Runnable implements Tab {
 				}
 			}
 		});
-		
-		tabRun.add(toggleButton);
+	
+// TODO: Add this button		
+//		tabRun.add(toggleButton);
 		
 		preview = new Results_Preview(controlPanel);
 		
@@ -183,7 +186,7 @@ public class Run implements Runnable implements Tab {
 	 * What should be done when the user comes from the previous tab.
 	 */
 	public void fromPreviousTab(){
-		
+		btnNextTab4.setText("Stop!");
 	}
 	
 	/**
@@ -227,10 +230,10 @@ public class Run implements Runnable implements Tab {
 		generationLabel.setText(Integer.toString(run.getGeneration()));
 		bestLabel.setText(Float.toString(run.getPopulation().getBestFitness()));
 		averageLabel.setText(Float.toString(run.getPopulation().getAverageFitness())); 
-		worstLabel.setText(Float.toString(run.getPopulation().getWorstFitness()));
+//		worstLabel.setText(Float.toString(run.getPopulation().getWorstFitness()));
 		bestImprovementLabel.setText(Float.toString((float)Math.round((run.getPopulation().calcBestImprovement(run.getFirstPopulation()))*1000)/10) + " %");
 		averageImprovementLabel.setText(Float.toString((float)Math.round((run.getPopulation().calcAverageImprovement(run.getFirstPopulation()))*1000)/10) + " %");
-		worstImprovementLabel.setText(Float.toString((float)Math.round((run.getPopulation().calcWorstImprovement(run.getFirstPopulation()))*1000)/10) + " %");
+//		worstImprovementLabel.setText(Float.toString((float)Math.round((run.getPopulation().calcWorstImprovement(run.getFirstPopulation()))*1000)/10) + " %");
 	}
 	
 	// Update the graphic

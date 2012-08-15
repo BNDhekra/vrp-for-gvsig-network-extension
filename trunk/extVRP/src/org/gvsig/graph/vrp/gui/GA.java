@@ -14,9 +14,10 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
+import org.metavrp.Problem;
+import org.metavrp.algorithm.GeneticAlgorithm;
 import org.metavrp.algorithm.GA.VRPGARun;
 import org.metavrp.algorithm.GA.operators.OperatorsAndParameters;
-import org.metavrp.problem.CostMatrix;
 
 //TODO: description of class
 public class GA implements Tab {
@@ -24,33 +25,39 @@ public class GA implements Tab {
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabGA;
 	private org.metavrp.algorithm.GA.operators.OperatorsAndParameters params;
+	private JRadioButton gaDefaultSettingsRadioButton;
+	private JRadioButton gaAdvancedSettingsRadioButton;
 	private ButtonGroup buttonGroup;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
-	private JLabel lblPopulationSize;
-	private JLabel lblOperator;
-	private JComboBox comboBox;
-	private JLabel lblProbability;
-	private JLabel label;
-	private JComboBox comboBox_1;
-	private JLabel lblProbability_1;
-	private JLabel lblElitism;
-	private JLabel lblInnerDepotPenalty;
+	private JTextField populationSizeTextField;
+	private JTextField crossoverProbabilityTextField;
+	private JTextField mutationProbabilityTextField;
+	private JTextField elitismTextField;
+	private JTextField overCapacityPenaltyTextField;
+	private JLabel populationSizeLabel;
+	private JLabel crossoverOperatorLabel;
+	private JComboBox crossoverOperatorComboBox;
+	private JLabel crossoverProbabilityLabel;
+	private JLabel mutationOperatorLabel;
+	private JComboBox mutationOperatorComboBox;
+	private JLabel mutationProbabilityLabel;
+	private JLabel elitismLabel;
+	private JLabel overCapacityPenaltyLabel;
 	
 	private int problemSize=1000;
 	
-	// Constructor.
-	// Just initializes the Control Panel on witch this JPanel will be drawn.
+
+	/**
+	 * Constructor.
+	 * Initializes the Control Panel on witch this JPanel will be drawn.
+	 * @param controlPanel The control panel object
+	 */
 	public GA(VRPControlPanel controlPanel) {
 		this.controlPanel = controlPanel;
 	}
 
 	
 	/**
-	 * Initialize Genetic Algorithm tab.
+	 * Initialize Genetic Algorithm's tab.
 	 * @wbp.parser.entryPoint
 	 */
 	public JPanel initTab() {
@@ -58,151 +65,151 @@ public class GA implements Tab {
 		tabGA = new JPanel();
 		tabGA.setLayout(null);
 		
-		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(null, "Genetic Algorithm settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(6, 7, 469, 47);
-		tabGA.add(panel);
-		panel.setLayout(null);
+		JPanel gaSettingsPanel = new JPanel();
+		gaSettingsPanel.setBorder(new TitledBorder(null, "Genetic Algorithm settings", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		gaSettingsPanel.setBounds(6, 7, 469, 47);
+		tabGA.add(gaSettingsPanel);
+		gaSettingsPanel.setLayout(null);
 		
 		buttonGroup = new ButtonGroup();
 		
-		JRadioButton rdbtnDefaultSettings = new JRadioButton("Default settings", true);
-		rdbtnDefaultSettings.addActionListener(new java.awt.event.ActionListener() {
+		gaDefaultSettingsRadioButton = new JRadioButton("Default settings", true);
+		gaDefaultSettingsRadioButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				enableOperatorsParameters(false);
 			}
 		});
-		buttonGroup.add(rdbtnDefaultSettings);
-		rdbtnDefaultSettings.setBounds(122, 17, 101, 23);
-		panel.add(rdbtnDefaultSettings);
+		buttonGroup.add(gaDefaultSettingsRadioButton);
+		gaDefaultSettingsRadioButton.setBounds(122, 17, 101, 23);
+		gaSettingsPanel.add(gaDefaultSettingsRadioButton);
 		
-		JRadioButton rdbtnUserSelectedadvanced = new JRadioButton("User selected settings (Advanced)");
-		rdbtnUserSelectedadvanced.addActionListener(new java.awt.event.ActionListener() {
+		gaAdvancedSettingsRadioButton = new JRadioButton("User selected settings (Advanced)");
+		gaAdvancedSettingsRadioButton.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				enableOperatorsParameters(true);
 			}
 		});
-		buttonGroup.add(rdbtnUserSelectedadvanced);
-		rdbtnUserSelectedadvanced.setBounds(228, 17, 191, 23);
-		panel.add(rdbtnUserSelectedadvanced);
+		buttonGroup.add(gaAdvancedSettingsRadioButton);
+		gaAdvancedSettingsRadioButton.setBounds(228, 17, 191, 23);
+		gaSettingsPanel.add(gaAdvancedSettingsRadioButton);
 		
-		JButton btnNextTab3 = new JButton("Run! >>");
-		btnNextTab3.setBounds(386, 278, 89, 23);
-		btnNextTab3.addActionListener(new java.awt.event.ActionListener() {
+		JButton btnNextGATab = new JButton("Run! >>");
+		btnNextGATab.setBounds(386, 278, 89, 23);
+		btnNextGATab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnNextGAActionPerformed();
 			}
 		});
-		tabGA.add(btnNextTab3);
+		tabGA.add(btnNextGATab);
 		
-		JButton btnPreviousTab3 = new JButton("<< Undo");
-		btnPreviousTab3.setBounds(287, 278, 89, 23);
-		btnPreviousTab3.addActionListener(new java.awt.event.ActionListener() {
+		JButton btnPreviousGATab = new JButton("<< Undo");
+		btnPreviousGATab.setBounds(287, 278, 89, 23);
+		btnPreviousGATab.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				btnPreviousGAActionPerformed();
 			}
 		});
-		tabGA.add(btnPreviousTab3);
+		tabGA.add(btnPreviousGATab);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, "Operators and Parameters", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(6, 65, 469, 206);
-		tabGA.add(panel_1);
-		panel_1.setLayout(null);
+		JPanel operatorsAndParametersPanel = new JPanel();
+		operatorsAndParametersPanel.setBorder(new TitledBorder(null, "Operators and Parameters", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		operatorsAndParametersPanel.setBounds(6, 65, 469, 206);
+		tabGA.add(operatorsAndParametersPanel);
+		operatorsAndParametersPanel.setLayout(null);
 		
-		lblPopulationSize = new JLabel("Population Size");
-		lblPopulationSize.setEnabled(false);
-		lblPopulationSize.setBounds(18, 22, 78, 22);
-		panel_1.add(lblPopulationSize);
+		populationSizeLabel = new JLabel("Population Size");
+		populationSizeLabel.setEnabled(false);
+		populationSizeLabel.setBounds(18, 22, 78, 22);
+		operatorsAndParametersPanel.add(populationSizeLabel);
 		
-		textField = new JTextField();
-		textField.setEnabled(false);
-		textField.setText(Integer.toString(2*problemSize));
-		textField.setBounds(100, 22, 90, 20);
-		panel_1.add(textField);
-		textField.setColumns(10);
+		populationSizeTextField = new JTextField();
+		populationSizeTextField.setEnabled(false);
+		populationSizeTextField.setText(Integer.toString(2*problemSize));
+		populationSizeTextField.setBounds(100, 22, 90, 20);
+		populationSizeTextField.setColumns(10);
+		operatorsAndParametersPanel.add(populationSizeTextField);
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new TitledBorder(null, "Crossover", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_2.setBounds(8, 55, 451, 46);
-		panel_1.add(panel_2);
-		panel_2.setLayout(null);
+		JPanel crossoverPanel = new JPanel();
+		crossoverPanel.setBorder(new TitledBorder(null, "Crossover", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		crossoverPanel.setBounds(8, 55, 451, 46);
+		operatorsAndParametersPanel.add(crossoverPanel);
+		crossoverPanel.setLayout(null);
 		
-		lblOperator = new JLabel("Operator");
-		lblOperator.setEnabled(false);
-		lblOperator.setBounds(10, 21, 44, 14);
-		panel_2.add(lblOperator);
+		crossoverOperatorLabel = new JLabel("Operator");
+		crossoverOperatorLabel.setEnabled(false);
+		crossoverOperatorLabel.setBounds(10, 21, 44, 14);
+		crossoverPanel.add(crossoverOperatorLabel);
 		
-		comboBox = new JComboBox();
-		comboBox.setEnabled(false);
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Edge", "Order", "Partially Mapped"}));
-		comboBox.setBounds(92, 18, 90, 20);
-		panel_2.add(comboBox);
+		crossoverOperatorComboBox = new JComboBox();
+		crossoverOperatorComboBox.setEnabled(false);
+		crossoverOperatorComboBox.setModel(new DefaultComboBoxModel(new String[] {"Edge", "Order", "Partially Mapped"}));
+		crossoverOperatorComboBox.setBounds(92, 18, 90, 20);
+		crossoverPanel.add(crossoverOperatorComboBox);
 		
-		lblProbability = new JLabel("Probability");
-		lblProbability.setEnabled(false);
-		lblProbability.setBounds(213, 21, 70, 14);
-		panel_2.add(lblProbability);
+		crossoverProbabilityLabel = new JLabel("Probability");
+		crossoverProbabilityLabel.setEnabled(false);
+		crossoverProbabilityLabel.setBounds(213, 21, 70, 14);
+		crossoverPanel.add(crossoverProbabilityLabel);
 		
-		textField_1 = new JTextField();
-		textField_1.setEnabled(false);
-		textField_1.setText("0.8");
-		textField_1.setBounds(316, 18, 58, 20);
-		panel_2.add(textField_1);
-		textField_1.setColumns(10);
+		crossoverProbabilityTextField = new JTextField();
+		crossoverProbabilityTextField.setEnabled(false);
+		crossoverProbabilityTextField.setText("0.8");
+		crossoverProbabilityTextField.setBounds(326, 18, 58, 20);
+		crossoverPanel.add(crossoverProbabilityTextField);
+		crossoverProbabilityTextField.setColumns(10);
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBorder(new TitledBorder(null, "Mutation", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_3.setBounds(8, 112, 451, 46);
-		panel_1.add(panel_3);
-		panel_3.setLayout(null);
+		JPanel mutationPanel = new JPanel();
+		mutationPanel.setBorder(new TitledBorder(null, "Mutation", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		mutationPanel.setBounds(8, 112, 451, 46);
+		operatorsAndParametersPanel.add(mutationPanel);
+		mutationPanel.setLayout(null);
 		
-		label = new JLabel("Operator");
-		label.setEnabled(false);
-		label.setBounds(10, 21, 44, 14);
-		panel_3.add(label);
+		mutationOperatorLabel = new JLabel("Operator");
+		mutationOperatorLabel.setEnabled(false);
+		mutationOperatorLabel.setBounds(10, 21, 44, 14);
+		mutationPanel.add(mutationOperatorLabel);
 		
-		comboBox_1 = new JComboBox();
-		comboBox_1.setEnabled(false);
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"Inversion", "Insertion", "Swap", "Swap with next"}));
-		comboBox_1.setBounds(92, 18, 90, 20);
-		panel_3.add(comboBox_1);
+		mutationOperatorComboBox = new JComboBox();
+		mutationOperatorComboBox.setEnabled(false);
+		mutationOperatorComboBox.setModel(new DefaultComboBoxModel(new String[] {"Inversion", "Insertion", "Swap", "Swap with next"}));
+		mutationOperatorComboBox.setBounds(92, 18, 90, 20);
+		mutationPanel.add(mutationOperatorComboBox);
 		
-		lblProbability_1 = new JLabel("Probability");
-		lblProbability_1.setEnabled(false);
-		lblProbability_1.setBounds(213, 21, 64, 14);
-		panel_3.add(lblProbability_1);
+		mutationProbabilityLabel = new JLabel("Probability");
+		mutationProbabilityLabel.setEnabled(false);
+		mutationProbabilityLabel.setBounds(213, 21, 64, 14);
+		mutationPanel.add(mutationProbabilityLabel);
 		
-		textField_2 = new JTextField();
-		textField_2.setEnabled(false);
-		textField_2.setText(Float.toString(1f/problemSize));
-		textField_2.setBounds(316, 18, 58, 20);
-		textField_2.setColumns(10);
-		panel_3.add(textField_2);
+		mutationProbabilityTextField = new JTextField();
+		mutationProbabilityTextField.setEnabled(false);
+		mutationProbabilityTextField.setText(Float.toString(1f/problemSize));
+		mutationProbabilityTextField.setBounds(326, 18, 58, 20);
+		mutationProbabilityTextField.setColumns(10);
+		mutationPanel.add(mutationProbabilityTextField);
 		
-		lblElitism = new JLabel("Elitism");
-		lblElitism.setEnabled(false);
-		lblElitism.setBounds(18, 178, 46, 14);
-		panel_1.add(lblElitism);
+		elitismLabel = new JLabel("Elitism");
+		elitismLabel.setEnabled(false);
+		elitismLabel.setBounds(18, 178, 46, 14);
+		operatorsAndParametersPanel.add(elitismLabel);
 		
-		textField_3 = new JTextField();
-		textField_3.setEnabled(false);
-		textField_3.setText("0.1");
-		textField_3.setBounds(100, 175, 90, 20);
-		panel_1.add(textField_3);
-		textField_3.setColumns(10);
+		elitismTextField = new JTextField();
+		elitismTextField.setEnabled(false);
+		elitismTextField.setText("0.1");
+		elitismTextField.setBounds(100, 175, 90, 20);
+		operatorsAndParametersPanel.add(elitismTextField);
+		elitismTextField.setColumns(10);
 		
-		textField_4 = new JTextField();
-		textField_4.setEnabled(false);
-		textField_4.setText("0.0");
-		textField_4.setBounds(324, 175, 58, 20);
-		panel_1.add(textField_4);
-		textField_4.setColumns(10);
+		overCapacityPenaltyTextField = new JTextField();
+		overCapacityPenaltyTextField.setEnabled(false);
+		overCapacityPenaltyTextField.setText("0.0");
+		overCapacityPenaltyTextField.setBounds(334, 175, 58, 20);
+		operatorsAndParametersPanel.add(overCapacityPenaltyTextField);
+		overCapacityPenaltyTextField.setColumns(10);
 		
-		lblInnerDepotPenalty = new JLabel("Inner Depot Penalty");
-		lblInnerDepotPenalty.setEnabled(false);
-		lblInnerDepotPenalty.setBounds(220, 178, 97, 14);
-		panel_1.add(lblInnerDepotPenalty);
+		overCapacityPenaltyLabel = new JLabel("Over Capacity Penalty");
+		overCapacityPenaltyLabel.setEnabled(false);
+		overCapacityPenaltyLabel.setBounds(220, 178, 110, 14);
+		operatorsAndParametersPanel.add(overCapacityPenaltyLabel);
 
 		return tabGA;
 	}
@@ -212,6 +219,7 @@ public class GA implements Tab {
 	 */
 	public void fromPreviousTab(){
 		// Update the problem size
+		// TODO: If the user was already on this tab, this value shouldn't be altered
 		setProblemSize(controlPanel.getODMatrix().getCostMatrix().getSize());
 	}
 	
@@ -222,48 +230,54 @@ public class GA implements Tab {
 		
 	}
 	
-	// Enables / Disables the operators and parameters definitions
+
+	/**
+	 * Enables or Disables the GA's operators and parameters definitions
+	 * @param enable Should the GA's operators and parameter be enabled?
+	 */
 	public void enableOperatorsParameters(boolean enable){
 		if (enable){
-			lblPopulationSize.setEnabled(true);
-			textField.setEnabled(true);
-			lblOperator.setEnabled(true);
-			comboBox.setEnabled(true);
-			lblProbability.setEnabled(true);
-			textField_1.setEnabled(true);
-			label.setEnabled(true);
-			comboBox_1.setEnabled(true);
-			lblProbability_1.setEnabled(true);
-			textField_2.setEnabled(true);
-			lblElitism.setEnabled(true);
-			textField_3.setEnabled(true);
-			lblInnerDepotPenalty.setEnabled(true);
-			textField_4.setEnabled(true);
+			populationSizeLabel.setEnabled(true);
+			populationSizeTextField.setEnabled(true);
+			crossoverOperatorLabel.setEnabled(true);
+			crossoverOperatorComboBox.setEnabled(true);
+			crossoverProbabilityLabel.setEnabled(true);
+			crossoverProbabilityTextField.setEnabled(true);
+			mutationOperatorLabel.setEnabled(true);
+			mutationOperatorComboBox.setEnabled(true);
+			mutationProbabilityLabel.setEnabled(true);
+			mutationProbabilityTextField.setEnabled(true);
+			elitismLabel.setEnabled(true);
+			elitismTextField.setEnabled(true);
+			overCapacityPenaltyLabel.setEnabled(true);
+			overCapacityPenaltyTextField.setEnabled(true);
 		} else {
-			lblPopulationSize.setEnabled(false);
-			textField.setEnabled(false);
-			lblOperator.setEnabled(false);
-			comboBox.setEnabled(false);
-			lblProbability.setEnabled(false);
-			textField_1.setEnabled(false);
-			label.setEnabled(false);
-			comboBox_1.setEnabled(false);
-			lblProbability_1.setEnabled(false);
-			textField_2.setEnabled(false);
-			lblElitism.setEnabled(false);
-			textField_3.setEnabled(false);
-			lblInnerDepotPenalty.setEnabled(false);
-			textField_4.setEnabled(false);
+			populationSizeLabel.setEnabled(false);
+			populationSizeTextField.setEnabled(false);
+			crossoverOperatorLabel.setEnabled(false);
+			crossoverOperatorComboBox.setEnabled(false);
+			crossoverProbabilityLabel.setEnabled(false);
+			crossoverProbabilityTextField.setEnabled(false);
+			mutationOperatorLabel.setEnabled(false);
+			mutationOperatorComboBox.setEnabled(false);
+			mutationProbabilityLabel.setEnabled(false);
+			mutationProbabilityTextField.setEnabled(false);
+			elitismLabel.setEnabled(false);
+			elitismTextField.setEnabled(false);
+			overCapacityPenaltyLabel.setEnabled(false);
+			overCapacityPenaltyTextField.setEnabled(false);
 		}
 	}
 	
-	// Generate an object with the desired GA parameters
-	public OperatorsAndParameters generateGAParameters(){
+	/**
+	 * Get the default operators and parameter values
+	 * @return The default GA's operators and parameters
+	 */
+	public OperatorsAndParameters getDefaultOperatorsAndParameters(){
 		int popSize=2*problemSize;
         float elitism=0.1f;
         float mutationProb=1f/problemSize;
         float crossoverProb=0.8f;
-        int generations=10000;
 		
         // Generate an object with the desired parameters
         OperatorsAndParameters operators = new OperatorsAndParameters();
@@ -278,36 +292,180 @@ public class GA implements Tab {
         
         return operators;
 	}
+
 	
-	// Set the problem size
+	/**
+	 * Get the user specified operators and parameter values
+	 * @return The user defined GA's operators and parameters
+	 */
+	public OperatorsAndParameters getUserDefinedOperatorsAndParameters(){
+		// 1. Get all the necessary operators and parameter values 
+		// 1.1 Get population size
+		int popSize;
+		try{
+			popSize = Integer.parseInt(populationSizeTextField.getText());
+		} catch (NumberFormatException ex){
+			// If the text is malformed send error to user and use 2*problemSize
+			controlPanel.showMessageDialog("Population_size_malformed");
+			popSize = 2 * problemSize;
+		}
+		// If the population size is lower than 2, send alert to user and use the value 2*problemSize
+		if(popSize<2){
+			controlPanel.showMessageDialog("Population_size_lower_than_2");
+			popSize = 2 * problemSize;
+		}
+		
+		// 1.2 Get crossover operator
+		String crossoverOperator = (String) crossoverOperatorComboBox.getSelectedItem();
+		if (crossoverOperator.equalsIgnoreCase("Edge")){
+			crossoverOperator="Edge3.Edge3";
+		} else if (crossoverOperator.equalsIgnoreCase("Order")){
+			crossoverOperator="Order1.Order1";
+		} else {
+			crossoverOperator="PMX.PMX";
+		}
+		
+		// 1.3 Get crossover probability
+		float crossoverProbability;
+		try{
+			crossoverProbability = Float.parseFloat(crossoverProbabilityTextField.getText());
+		} catch(NumberFormatException ex){
+			// If the text is malformed send error to user and use 0.8
+			controlPanel.showMessageDialog("Crossover_probability_malformed");
+			crossoverProbability = 0.8f;
+		}
+		// If the chosen value is lower than 0, show alert to the user and use the value 0
+		if (crossoverProbability<0){
+			controlPanel.showMessageDialog("Crossover_probability_lower_than_zero");
+			crossoverProbability = 0f;
+		}
+		// If the chosen value is higher than 1, show alert to the user and use the value 1 
+		if(crossoverProbability>1){
+			controlPanel.showMessageDialog("Crossover_probability_higher_than_one");
+			crossoverProbability = 1f;
+		}
+		
+		// 1.4 Get mutation operator
+		String mutationOperator = (String) mutationOperatorComboBox.getSelectedItem();
+		if (mutationOperator.equalsIgnoreCase("Inversion")){
+			mutationOperator="InversionMutation.inversionMutation";
+		} else if (mutationOperator.equalsIgnoreCase("Insertion")){
+			mutationOperator="InsertMutation.insertMutation";
+		} else if (mutationOperator.equalsIgnoreCase("Swap")){
+			mutationOperator="SwapMutation.swapMutation";
+		} else {
+			mutationOperator="SwapNextMutation.swapNextMutation";
+		}
+		
+		// 1.5 Get mutation probability
+		float mutationProbability;
+		try{
+			mutationProbability = Float.parseFloat(mutationProbabilityTextField.getText());
+		} catch(NumberFormatException ex){
+			// If the text is malformed send error to user and use the value 1/problemSize
+			controlPanel.showMessageDialog("Mutation_probability_malformed");
+			mutationProbability = 1f/problemSize;
+		}
+		// If the chosen value is lower than 0, show alert to the user and use the value 0
+		if (mutationProbability<0){
+			controlPanel.showMessageDialog("Mutation_probability_lower_than_zero");
+			mutationProbability = 0f;
+		}
+		// If the chosen value is higher than 1, show alert to the user and use the value 1
+		if(mutationProbability>1){
+			controlPanel.showMessageDialog("Mutation_probability_highter_than_one");
+			mutationProbability = 1f;
+		}
+		
+		// 1.6 Get the elitism value
+		float elitism;
+		try{
+			elitism = Float.parseFloat(elitismTextField.getText());
+		} catch(NumberFormatException ex){
+			// If the text is malformed send error to user and use the value 0.1
+			controlPanel.showMessageDialog("Elitism_malformed");
+			elitism = 0.1f;
+		}
+		// If the chosen value is lower than 0, show alert to the user and use the value 0
+		if (elitism<0){
+			controlPanel.showMessageDialog("Elitism_lower_than_zero");
+			elitism = 0f;
+		}
+		// If the chosen value is higher or equal to 1, show alert to the user and use the value 1
+		if(mutationProbability>1){
+			controlPanel.showMessageDialog("Elitism_equal_or_highter_than_one");
+			elitism = 1f;
+		}
+		
+		// 1.7 Get the over capacity penalty value
+		float overCapacityPenalty;
+		try{
+			overCapacityPenalty = Float.parseFloat(overCapacityPenaltyTextField.getText());
+		} catch(NumberFormatException ex){
+			// If the text is malformed send error to user and use the value 0
+			controlPanel.showMessageDialog("Over_capacity_penalty_malformed");
+			overCapacityPenalty = 0f;
+		}
+		// If the chosen value is lower than 0, show alert to the user and use the value 0
+		if (elitism<0){
+			controlPanel.showMessageDialog("Over_capacity_penalty_lower_than_zero");
+			overCapacityPenalty = 0f;
+		}
+		
+		// 2. All the values have been obtained. Now create the OperatorsAndParameters object and return it
+        OperatorsAndParameters operators = new OperatorsAndParameters();
+        
+        operators.setPopulationSize(popSize);
+        operators.setCrossoverOperator(crossoverOperator);
+        operators.setCrossoverProb(crossoverProbability);
+        operators.setMutationOperator(mutationOperator);
+        operators.setMutationProb(mutationProbability);
+        operators.setReplacementElitism(elitism);
+        operators.setInnerDepotPenalty(overCapacityPenalty);
+
+        return operators;
+	}
+	
+
+	/**
+	 * Set the problem size (nº of customers + nº of depots)
+	 * @param problemSize Integer specifying the size of the problem (nº of customers + nº of depots)
+	 */
+	// TODO: Shouldn't be the nº of customers + nº of depots + nº of vehicles?
 	public void setProblemSize(int problemSize) {
 		this.problemSize = problemSize;
-		textField.setText(Integer.toString(2*problemSize));
+		populationSizeTextField.setText(Integer.toString(2*problemSize));
+		mutationProbabilityTextField.setText(Float.toString(1f/problemSize));
 	}
 
 
-	// Get the GA options and run the GA with them
+	/**
+	 * The action performed by the "Next" button.
+	 * Get all the GA options and run the GA.
+	 */
 	private void btnNextGAActionPerformed(){
-		// Insist that the button has the text "Run!"
-		controlPanel.getRun().btnNextTab4.setText("Stop!");
+		// 1. Get the problem definition from the Vehicles tab
+		Problem problem = controlPanel.getVehicles().getProblem();
 		
-		// Create an object with the GA parameters
-		params = generateGAParameters();
+		// 2. Create the Genetic Algorithm Object
+		GeneticAlgorithm ga;
+		if (gaDefaultSettingsRadioButton.isSelected()){
+			ga = new GeneticAlgorithm(getDefaultOperatorsAndParameters(), problem);
+		} else {
+			ga = new GeneticAlgorithm(getUserDefinedOperatorsAndParameters(), problem);
+		}
 		
-		// Get the list of genes from the Vehicles class
-		GeneList geneList = controlPanel.getVehicles().getGeneList();
-		
-		// Get the cost matrix from the ODMatrix class
-		CostMatrix costMatrix = controlPanel.getODMatrix().getCostMatrix();
-		
-        // Run the genetic algorithm
+        // 3. Run the Genetic Algorithm
 		Run run = controlPanel.getRun();	// Get the run object
-        run.setVRPGARun(new VRPGARun(params, geneList, costMatrix, "", 1, 0));	// Create the object with all we need
+        run.setVRPGARun(new VRPGARun(ga, problem.getCostMatrix(), "", 1, 0));	// Create the object with all we need
         controlPanel.switchToNextTab();		// Switch to the Run tab
         run.go();	// Can go! Can run the GA!
 	}
 	
-	// Just go to the previous tab
+	/**
+	 * The action performed by the "Back" or "Undo" button.
+	 * Go to the previous tab
+	 */
 	private void btnPreviousGAActionPerformed(){
 		controlPanel.switchToPreviousTab();
 	}

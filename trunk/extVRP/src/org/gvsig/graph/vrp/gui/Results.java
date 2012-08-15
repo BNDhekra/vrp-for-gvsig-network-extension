@@ -7,39 +7,26 @@ package org.gvsig.graph.vrp.gui;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableModel;
 
 import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.core.Network;
 import org.gvsig.graph.core.NetworkUtils;
 import org.gvsig.graph.solvers.Route;
 import org.gvsig.graph.vrp.support.DrawRoutes;
-import org.metavrp.GA.Chromosome;
-import org.metavrp.GA.Population;
+import org.metavrp.algorithm.GA.Chromosome;
 
 import com.iver.andami.PluginServices;
-import com.iver.cit.gvsig.exceptions.layers.ReloadLayerException;
 import com.iver.cit.gvsig.fmap.core.IFeature;
-import com.iver.cit.gvsig.fmap.drivers.ConcreteMemoryDriver;
-import com.iver.cit.gvsig.fmap.drivers.MemoryDriver;
-import com.iver.cit.gvsig.fmap.layers.FLayer;
-import com.iver.cit.gvsig.fmap.layers.LayerFactory;
-import com.iver.cit.gvsig.util.GvSession;
-
-import javax.swing.border.TitledBorder;
-import javax.swing.JToggleButton;
 
 //TODO: description of class
 public class Results implements Tab {
@@ -110,18 +97,21 @@ public class Results implements Tab {
 		JLabel lblShowTop = new JLabel("Show the top");
 lblShowTop.setEnabled(false);
 		lblShowTop.setBounds(10, 229, 64, 14);
-		tabResults.add(lblShowTop);
+// TODO: Add this (when its operational)
+//		tabResults.add(lblShowTop);
 		
 		textField = new JTextField();
 textField.setEnabled(false);
 		textField.setBounds(76, 227, 30, 20);
-		tabResults.add(textField);
+// TODO: Add this (when its operational)
+//		tabResults.add(textField);
 		textField.setText("10");
 		textField.setColumns(3);
 		
 		JLabel lblResults = new JLabel("results");
 		lblResults.setBounds(108, 230, 32, 14);
-		tabResults.add(lblResults);
+// TODO: Add this (when its operational)
+//		tabResults.add(lblResults);
 		tabResults.add(btnNextTab5);
 		
 		// Button "<< Undo"
@@ -179,7 +169,8 @@ tglbtnPreview.setEnabled(false);
 				}
 			}
 		});
-		tabResults.add(tglbtnPreview);
+// TODO: Add this button
+//		tabResults.add(tglbtnPreview);
 		
 		preview = new Results_Preview(controlPanel);
 		

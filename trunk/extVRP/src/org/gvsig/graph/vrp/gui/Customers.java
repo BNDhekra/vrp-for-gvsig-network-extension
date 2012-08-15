@@ -340,9 +340,6 @@ public class Customers implements Tab {
 			controlPanel.showMessageDialog("No_field_selected");
 			return;
 		}
-	
-		// Initialize the next tab 
-		controlPanel.getVehicles().fromPreviousTab();
 		
 		// Go to the next tab
 		controlPanel.switchToNextTab();
