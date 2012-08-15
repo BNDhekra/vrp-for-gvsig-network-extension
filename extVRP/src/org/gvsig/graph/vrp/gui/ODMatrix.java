@@ -362,6 +362,12 @@ public class ODMatrix extends JPanel implements Tab {
 	// Verifies the file and tolerance validity, then creates or opens ODMatrix file
 	private void btnNextODMatrixActionPerformed(java.awt.event.ActionEvent evt) {
 		
+		// If the user didn't choose any layer for the customers, show alert and return
+		if (customersLayerList.getSelectedIndex()==0){
+			controlPanel.showMessageDialog("Choose_customers_layer");
+			return;
+		}
+		
 		// Try to get the tolerance
 		maxTolerance = getTolerance();			
 		
@@ -421,7 +427,7 @@ public class ODMatrix extends JPanel implements Tab {
 		Network net = VRPExtension.getNetwork();
 		
 		//Get the selected layer
-		customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
+		customersLayer = (FLyrVect) controlPanel.getMapContext().getLayers().getLayer((String)customersLayerList.getSelectedItem());
 		
 		//Put the flags on the network
 		if (autoTolerance==true){
@@ -495,7 +501,7 @@ public class ODMatrix extends JPanel implements Tab {
 			selectedWriter = odMatrixWriters.get(getFileFormat());
 			
 			// Put the flags on the network
-			customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
+			customersLayer = (FLyrVect) controlPanel.getMapContext().getLayers().getLayer((String)customersLayerList.getSelectedItem());
 			try {
 				originFlags = putFlagsOnNetwork(customersLayer, net); 
 			} catch (BaseException ex){
@@ -519,7 +525,7 @@ long start = System.currentTimeMillis();
 			while (true){
 				try {
 					System.out.println("\nTrying to put flags on the network with a tolerance of "+tolerance);	
-					customersLayer = (FLyrVect) customersLayerList.getSelectedItem();
+					customersLayer = (FLyrVect) controlPanel.getMapContext().getLayers().getLayer((String)customersLayerList.getSelectedItem());
 					originFlags = NetworkUtils.putFlagsOnNetwork(customersLayer, net, tolerance);
 					long stop = System.currentTimeMillis();
 					System.out.println("Took "+ (stop-start) + "ms and it Worked!\n\n");	

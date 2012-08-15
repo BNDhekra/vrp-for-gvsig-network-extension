@@ -40,17 +40,12 @@
  */
 package org.gvsig.graph.vrp;
 
-import java.awt.Component;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-
-import org.gvsig.exceptions.BaseException;
 import org.gvsig.graph.IODMatrixFileWriter;
 import org.gvsig.graph.ODMatrixFileWriter4cols;
 import org.gvsig.graph.ODMatrixFileWriter4cols_minutes_km;
 import org.gvsig.graph.ODMatrixFileWriterRFormat;
-import org.gvsig.graph.core.GraphException;
 import org.gvsig.graph.core.Network;
 import org.gvsig.graph.vrp.gui.VRPControlPanel;
 
@@ -104,19 +99,20 @@ public class VRPExtension extends Extension {
 
 			if ( net != null)
 			{
-//OdMatrixControlPanel ctrlDlg = new OdMatrixControlPanel();
-VRPControlPanel ctrlDlg = new VRPControlPanel(odMatrixWriters, net, this);
-					try {
-						ctrlDlg.setMapContext(mapControl.getMapContext());
-						PluginServices.getMDIManager().addWindow(ctrlDlg);
-
-					} catch (BaseException e) {
-						e.printStackTrace();
-						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
-							JOptionPane.showMessageDialog((Component) PluginServices.getMainFrame(), PluginServices.getText(null, "there_are_points_outside_the_tolerance"));
-//							NotificationManager.addError(e.getFormatString(), e);
-					}
-				}
+				//OdMatrixControlPanel ctrlDlg = new OdMatrixControlPanel();
+				VRPControlPanel controlPanel = new VRPControlPanel(this, mapControl.getMapContext(), net, odMatrixWriters);
+//					try {
+//						
+//						ctrlDlg.setMapContext(mapControl.getMapContext());
+				PluginServices.getMDIManager().addWindow(controlPanel);
+//
+//					} catch (BaseException e) {
+//						e.printStackTrace();
+//						if (e.getCode() == GraphException.FLAG_OUT_NETWORK) {
+//							JOptionPane.showMessageDialog((Component) PluginServices.getMainFrame(), PluginServices.getText(null, "there_are_points_outside_the_tolerance"));
+////							NotificationManager.addError(e.getFormatString(), e);
+//					}
+//				}
 			}
 		}
 	}

@@ -58,16 +58,18 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	private JTabbedPane tabs;
 	private JPanel tabLayers, tabCustomers, tabVehicles, tabGA, tabRun, tabResults;
 	
-	// Panel Objects
+	// Tabs
 	private ODMatrix odmatrix;
 	private Customers customers;
 	private Vehicles vehicles;
 	private GA ga;
 	private Run run;
 	private Results results;
+	// List of tabs
+	ArrayList<Tab> tabList = new ArrayList<Tab>();
 
 	// metaVRP library objects
-	private Problem metavrpProblem;
+	private Problem metavrpProblem = new Problem();
 	private GeneticAlgorithm metavrpGA;
 
 	//	private JTextArea getTxtFormatAreaDescription() {
@@ -101,12 +103,14 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	}
 
 	/** Creates new form OdMatrixControlPanel */
-	public VRPControlPanel(ArrayList<IODMatrixFileWriter> odMatrixWriters, Network net, VRPExtension extension) {
+	public VRPControlPanel(VRPExtension extension, MapContext mapContext, Network net, ArrayList<IODMatrixFileWriter> odMatrixWriters) {
 		this.extension=extension;
 		this.odMatrixWriters=odMatrixWriters;
 		this.network=net;
+		this.mapContext=mapContext;
 		// Initializes the graphical interface
 		initComponents();
+
 		// Starts up the first tab
 		odmatrix.fromPreviousTab();
 	}
@@ -124,32 +128,38 @@ public class VRPControlPanel extends JPanel implements IWindow {
 
 		// First tab: Cost Matrix
 		odmatrix = new ODMatrix(this, odMatrixWriters);
+		tabList.add(odmatrix);
 		tabLayers = odmatrix.initTab();
 		tabs.addTab("OD Matrix", null, tabLayers, null);
 		
 		// Second tab: Customers
 		customers = new Customers(this);
+		tabList.add(customers);
 		tabCustomers = customers.initTab();
 		tabs.addTab("Customers", null, tabCustomers, null);
 
 		// Third tab: Vehicles
 		vehicles = new Vehicles(this);
+		tabList.add(vehicles);
 		tabVehicles = vehicles.initTab();
 		tabs.addTab("Vehicles", null, tabVehicles, null);
 		
 		// Fourth tab: Genetic Algorithm
 		ga = new GA(this);
+		tabList.add(ga);
 		tabGA = ga.initTab();
 		tabs.addTab("GA", null, tabGA, null);
 		
 		// Fifth tab: Run the GA
 		run = new Run(this);
+		tabList.add(run);
 		tabRun = run.initTab();
 //		run.run();	// Prepare the thread to run when the problem is correctly defined 
 		tabs.addTab("Run", null, tabRun, null);
 
 		// Sixth tab: Best Results
 		results = new Results(this);
+		tabList.add(results);
 		tabResults = results.initTab();
 		tabs.addTab("Results", null, tabResults, null);
 		
@@ -193,9 +203,7 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	 * @param mapContext
 	 * @throws BaseException
 	 */
-	// Sets
-	public void setMapContext(MapContext mapContext) throws BaseException {
-		// Set the map context
+	public void setMapContext(MapContext mapContext){
 		this.mapContext = mapContext;
 	}
 	
@@ -215,7 +223,7 @@ public class VRPControlPanel extends JPanel implements IWindow {
 			wi = new WindowInfo(WindowInfo.PALETTE);
 			wi.setWidth((int) this.getPreferredSize().getWidth());
 			wi.setHeight((int) this.getPreferredSize().getHeight());
-			wi.setTitle(_T("vrp_control_panel"));
+			wi.setTitle(_T("VRP_control_panel"));
 		}
 		return wi;
 	}
@@ -282,17 +290,29 @@ public class VRPControlPanel extends JPanel implements IWindow {
 	
 	// Switch to the next tab and hide the one before
 	public void switchToNextTab(){
+		// Get the current tab index
 		int selectedTabIndex = tabs.getSelectedIndex();
+		// Call the method fromPreviousTab() of the next tab
+		tabList.get(selectedTabIndex+1).fromPreviousTab();
+		// Disable the current tab
 		tabs.setEnabledAt(selectedTabIndex, false);
+		// Enable the next tab
 		tabs.setEnabledAt(selectedTabIndex+1, true);
+		// Go to the next tab
 		tabs.setSelectedIndex(selectedTabIndex+1);
 	}
 	
 	// Switch to the previous tab and hide this one
 	public void switchToPreviousTab(){
+		// Get the current tab index
 		int selectedTabIndex = tabs.getSelectedIndex();
+		// Call the method fromNextTab() of the previous tab
+		tabList.get(selectedTabIndex-1).fromNextTab();
+		// Disable the current tab
 		tabs.setEnabledAt(selectedTabIndex, false);
+		// Enable the previous tab
 		tabs.setEnabledAt(selectedTabIndex-1, true);
+		// Go to the previous tab
 		tabs.setSelectedIndex(selectedTabIndex-1);
 	}
 	

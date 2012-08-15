@@ -15,8 +15,8 @@ import org.gvsig.graph.core.Network;
 import org.gvsig.graph.solvers.Route;
 import org.gvsig.graph.solvers.ShortestPathSolverAStar;
 import org.gvsig.graph.vrp.gui.VRPControlPanel;
-import org.metavrp.GA.Chromosome;
-import org.metavrp.GA.Gene;
+import org.metavrp.algorithm.GA.Chromosome;
+import org.metavrp.algorithm.GA.Gene;
 
 import com.hardcode.gdbms.engine.values.Value;
 import com.iver.andami.PluginServices;

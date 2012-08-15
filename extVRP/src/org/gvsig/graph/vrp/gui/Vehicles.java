@@ -45,23 +45,26 @@ public class Vehicles implements Tab {
 	private JComboBox depot;
 	private int depotNumber;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
-	
+	private JRadioButton rdbtnHomogeneousFleet;
+	private JRadioButton rdbtnHeterogeneousFleet;
+
+	// Homogeneous fleet elements
 	private JLabel lblVehicleCapacity;
 	private JTextField homogeneousVehiclesCapacity;
 	private JLabel lblChooseVehiclesLayer;
 	private JLabel lblVehicleIdentification;
 	private JLabel lblVehiclesCapacities;
-	private JRadioButton rdbtnHomogeneousFleet;
-	private JRadioButton rdbtnHeterogeneousFleet;
 	
+	// Heterogeneous fleet elements
 	private JComboBox comboBoxVehiclesLayer;
 	private FLyrVect selectedLayer;
 	private JComboBox comboBoxVehiclesId;
-	private String selectedIdField;
 	private ArrayList<String> idFieldValues;
 	private JComboBox comboBoxVehiclesCapacities;
-	private String selectedCapacitiesField;
 	private ArrayList<Float> capacitiesFieldValues;
+	
+	// The problem definition
+	private Problem problem;
 	
 
 	/**
@@ -589,18 +592,16 @@ public class Vehicles implements Tab {
 		}
 		
 		// Put all this on the Problem class which already has the Cost Matrix added
-		Problem problem = controlPanel.getMetavrpProblem();
+		problem = controlPanel.getMetavrpProblem();
 		problem.setCustomers(customers);
 		problem.setVehicles(vehicles);
 		problem.setDepots(depots);
 	}
 	
-	
-	/*
-	 * Getters and Setters
+	/**
+	 * Get the index of the Distance Matrix that corresponds to the depot
+	 * @return The index of the Distance Matrix that corresponds to the depot
 	 */
-	
-	// Get the number of the depot
 	public int getDepotNumber() {
 		return depotNumber;
 	}
@@ -679,6 +680,15 @@ public class Vehicles implements Tab {
 		return rdbtnHomogeneousFleet.isSelected();
 	}
 	
+	
+	/**
+	 * Get the VRP problem definition
+	 * @return The problem definition
+	 */
+	public Problem getProblem() {
+		return problem;
+	}
+
 	/*
 	 * "Next" and "Back" Buttons
 	 */

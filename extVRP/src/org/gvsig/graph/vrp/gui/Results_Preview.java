@@ -1,55 +1,19 @@
 package org.gvsig.graph.vrp.gui;
 
-import javax.swing.AbstractButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-
-import com.hardcode.gdbms.engine.values.Value;
-import com.iver.andami.PluginServices;
-import com.iver.andami.ui.mdiManager.IWindow;
-import com.iver.andami.ui.mdiManager.WindowInfo;
-import com.iver.cit.gvsig.fmap.MapContext;
-import com.iver.cit.gvsig.fmap.MapControl;
-import com.iver.cit.gvsig.fmap.core.DefaultFeature;
-import com.iver.cit.gvsig.fmap.core.GeneralPathX;
-import com.iver.cit.gvsig.fmap.core.IFeature;
-import com.iver.cit.gvsig.fmap.core.IGeometry;
-import com.iver.cit.gvsig.fmap.core.ShapeFactory;
-import com.iver.cit.gvsig.fmap.core.styles.ArrowDecoratorStyle;
-import com.iver.cit.gvsig.fmap.core.styles.ILineStyle;
-import com.iver.cit.gvsig.fmap.core.styles.SimpleLineStyle;
-import com.iver.cit.gvsig.fmap.core.symbols.ArrowMarkerSymbol;
-import com.iver.cit.gvsig.fmap.core.symbols.SimpleLineSymbol;
-import com.iver.cit.gvsig.fmap.drivers.MemoryDriver;
-import com.iver.cit.gvsig.fmap.layers.FLayerStatus;
-import com.iver.cit.gvsig.fmap.layers.GraphicLayer;
-import com.iver.cit.gvsig.fmap.rendering.FGraphic;
-import com.iver.cit.gvsig.project.documents.view.gui.View;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Frame;
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
-import javax.swing.JTextField;
+import javax.swing.JPanel;
 
-import org.cresques.cts.ProjectionPool;
-import org.gvsig.graph.core.GraphException;
 import org.gvsig.graph.core.GvFlag;
 import org.gvsig.graph.core.Network;
-import org.gvsig.graph.solvers.Route;
-import org.gvsig.graph.solvers.ShortestPathSolverAStar;
 import org.gvsig.graph.vrp.support.DrawRoutes;
-import org.gvsig.graph.vrp.support.Nodes;
-import org.metavrp.GA.Chromosome;
-import org.metavrp.GA.Gene;
+import org.metavrp.algorithm.GA.Chromosome;
+
+import com.iver.andami.ui.mdiManager.IWindow;
+import com.iver.andami.ui.mdiManager.WindowInfo;
+import com.iver.cit.gvsig.fmap.MapControl;
+import com.iver.cit.gvsig.fmap.core.IFeature;
 
 public class Results_Preview extends JPanel implements IWindow, Runnable {
 
@@ -76,7 +40,6 @@ public class Results_Preview extends JPanel implements IWindow, Runnable {
 		setLayout(null);
 	}
 
-	@Override
 	public WindowInfo getWindowInfo() {
 		if (wi == null) {
 			wi = new WindowInfo(WindowInfo.RESIZABLE | WindowInfo.MAXIMIZABLE | WindowInfo.ICONIFIABLE | WindowInfo.MODELESSDIALOG | WindowInfo.NOTCLOSABLE);
@@ -102,7 +65,6 @@ public class Results_Preview extends JPanel implements IWindow, Runnable {
 		wi.setY(Y);
 	}
 
-	@Override
 	public Object getWindowProfile() {
 //		return WindowInfo.EDITOR_PROFILE;
 //		return WindowInfo.TOOL_PROFILE;
