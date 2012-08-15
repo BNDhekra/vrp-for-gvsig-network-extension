@@ -42,7 +42,7 @@ public class Vehicles implements Tab {
 	private JLabel lblNOfVehicles;
 	private JTextField nrHomogeneousVehicles;
 	private JLabel lblputIn;
-	private JComboBox<String> depot;
+	private JComboBox depot;
 	private int depotNumber;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	
@@ -54,12 +54,12 @@ public class Vehicles implements Tab {
 	private JRadioButton rdbtnHomogeneousFleet;
 	private JRadioButton rdbtnHeterogeneousFleet;
 	
-	private JComboBox<String> comboBoxVehiclesLayer;
+	private JComboBox comboBoxVehiclesLayer;
 	private FLyrVect selectedLayer;
-	private JComboBox<String> comboBoxVehiclesId;
+	private JComboBox comboBoxVehiclesId;
 	private String selectedIdField;
 	private ArrayList<String> idFieldValues;
-	private JComboBox<String> comboBoxVehiclesCapacities;
+	private JComboBox comboBoxVehiclesCapacities;
 	private String selectedCapacitiesField;
 	private ArrayList<Float> capacitiesFieldValues;
 	
@@ -167,7 +167,7 @@ public class Vehicles implements Tab {
 		
 		// ComboBox with all the layers.
 		// TODO: what about getting the vehicles information from a table? (In the start menu)
-		comboBoxVehiclesLayer = new JComboBox<String>();
+		comboBoxVehiclesLayer = new JComboBox();
 		comboBoxVehiclesLayer.setBounds(176, 167, 220, 20);
 		comboBoxVehiclesLayer.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -180,7 +180,7 @@ public class Vehicles implements Tab {
 		lblVehicleIdentification.setBounds(62, 200, 89, 17);
 		tabVehicles.add(lblVehicleIdentification);
 		
-		comboBoxVehiclesId = new JComboBox<String>();
+		comboBoxVehiclesId = new JComboBox();
 		comboBoxVehiclesId.setBounds(176, 198, 220, 20);
 		comboBoxVehiclesId.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -198,7 +198,7 @@ public class Vehicles implements Tab {
 		lblVehiclesCapacities.setBounds(62, 233, 100, 14);
 		tabVehicles.add(lblVehiclesCapacities);
 		
-		comboBoxVehiclesCapacities = new JComboBox<String>();
+		comboBoxVehiclesCapacities = new JComboBox();
 		comboBoxVehiclesCapacities.setBounds(176, 230, 220, 20);
 		comboBoxVehiclesCapacities.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {

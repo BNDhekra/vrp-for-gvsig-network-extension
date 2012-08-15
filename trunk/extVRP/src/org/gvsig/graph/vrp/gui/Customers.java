@@ -19,7 +19,7 @@ public class Customers implements Tab {
 	
 	private VRPControlPanel controlPanel;				// The VRP Control Panel that called this object
 	private JPanel tabCustomers;
-	private JComboBox<String> customersDemandComboBox;
+	private JComboBox customersDemandComboBox;
 	
 	// The customer's demand
 	private ArrayList<Float> customersDemand;
@@ -62,7 +62,7 @@ public class Customers implements Tab {
 		lblCustomersDemand.setBounds(45, 12, 112, 14);
 		tabCustomers.add(lblCustomersDemand);
 		
-		customersDemandComboBox = new JComboBox<String>();
+		customersDemandComboBox = new JComboBox();
 		customersDemandComboBox.setBounds(167, 8, 209, 23);
 		customersDemandComboBox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -99,7 +99,7 @@ public class Customers implements Tab {
 		lblFrom.setBounds(20, 71, 46, 14);
 		tabCustomers.add(lblFrom);
 		
-		JComboBox<String> comboBox_1 = new JComboBox<String>();
+		JComboBox comboBox_1 = new JComboBox();
 		comboBox_1.setEnabled(false);
 		comboBox_1.setBounds(53, 68, 147, 20);
 		tabCustomers.add(comboBox_1);
@@ -109,7 +109,7 @@ public class Customers implements Tab {
 		lblTo.setBounds(230, 71, 46, 14);
 		tabCustomers.add(lblTo);
 		
-		JComboBox<String> comboBox_2 = new JComboBox<String>();
+		JComboBox comboBox_2 = new JComboBox();
 		comboBox_2.setEnabled(false);
 		comboBox_2.setBounds(250, 68, 165, 20);
 		tabCustomers.add(comboBox_2);
@@ -119,7 +119,7 @@ public class Customers implements Tab {
 		label_2.setBounds(20, 121, 46, 14);
 		tabCustomers.add(label_2);
 		
-		JComboBox<String> comboBox_3 = new JComboBox<String>();
+		JComboBox comboBox_3 = new JComboBox();
 		comboBox_3.setEnabled(false);
 		comboBox_3.setBounds(53, 118, 147, 20);
 		tabCustomers.add(comboBox_3);
@@ -129,7 +129,7 @@ public class Customers implements Tab {
 		label_3.setBounds(230, 121, 46, 14);
 		tabCustomers.add(label_3);
 		
-		JComboBox<String> comboBox_4 = new JComboBox<String>();
+		JComboBox comboBox_4 = new JComboBox();
 		comboBox_4.setEnabled(false);
 		comboBox_4.setBounds(250, 118, 165, 20);
 		tabCustomers.add(comboBox_4);
@@ -139,7 +139,7 @@ public class Customers implements Tab {
 		label_4.setBounds(20, 174, 46, 14);
 		tabCustomers.add(label_4);
 		
-		JComboBox<String> comboBox_5 = new JComboBox<String>();
+		JComboBox comboBox_5 = new JComboBox();
 		comboBox_5.setEnabled(false);
 		comboBox_5.setBounds(53, 171, 147, 20);
 		tabCustomers.add(comboBox_5);
@@ -149,7 +149,7 @@ public class Customers implements Tab {
 		label_5.setBounds(230, 174, 46, 14);
 		tabCustomers.add(label_5);
 		
-		JComboBox<String> comboBox_6 = new JComboBox<String>();
+		JComboBox comboBox_6 = new JComboBox();
 		comboBox_6.setEnabled(false);
 		comboBox_6.setBounds(250, 171, 165, 20);
 		tabCustomers.add(comboBox_6);
