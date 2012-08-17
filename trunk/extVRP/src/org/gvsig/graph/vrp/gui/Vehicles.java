@@ -574,7 +574,7 @@ public class Vehicles implements Tab {
 				// Add all the vehicles to the vehicles list
 				for (int j=0; j<vehiclesIds.size(); j++){
 					// TODO: If the vehicle's capacity is 0 (zero) it shouldn't be used at all
-					Vehicle vehicle = new Vehicle(getDepotNumber(),vehiclesCapacities.get(j));
+					Vehicle vehicle = new Vehicle(vehiclesIds.get(j),getDepotNumber(),vehiclesCapacities.get(j));
 					vehicles.add(vehicle);
 				}
 				
@@ -659,7 +659,7 @@ public class Vehicles implements Tab {
 	 * @throws NumberFormatException
 	 */
 	public int getNumHomogeneousVehicles() throws NumberFormatException{
-		return Integer.parseInt(homogeneousVehiclesCapacity.getText());
+		return Integer.parseInt(nrHomogeneousVehicles.getText());
 	}
 	
 	/**

@@ -39,7 +39,7 @@ public class DrawRoutes {
 	/*
 	 *  Calculate lines (Polyline2D's) between all the adjacent nodes of the chromosome  
 	 */
-	public static ArrayList<IFeature> calculateStraightRoutes(Chromosome bestChromosome, VRPControlPanel controlPanel){
+	public static ArrayList<IFeature> calculateStraightRoutes(Chromosome chromosome, VRPControlPanel controlPanel){
 		// Create the list of geometries
 		ArrayList<IFeature> geometries = new ArrayList<IFeature>();
 		try{
@@ -49,17 +49,16 @@ public class DrawRoutes {
 		Gene geneA, geneB;
 		GvFlag flagA, flagB;
 		// Get the lenght of the chromosome
-		int lenght = bestChromosome.getLenght();
+		int lenght = chromosome.getLenght();
 		// With any two adjacent genes, draw a straight line between their nodes on the map
-		
 		for (int i=0; i<lenght; i++){
 			// Get the genes and the respective flags
 			if (i==0){
-				geneA = bestChromosome.getGene(lenght-1);
+				geneA = chromosome.getGene(lenght-1);
 			} else {
-				geneA = bestChromosome.getGene(i-1);
+				geneA = chromosome.getGene(i-1);
 			}
-			geneB = bestChromosome.getGene(i);
+			geneB = chromosome.getGene(i);
 			flagA = nodes.getNode(geneA).getFlag();
 			flagB = nodes.getNode(geneB).getFlag();
 			
