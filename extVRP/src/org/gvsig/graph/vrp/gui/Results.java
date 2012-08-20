@@ -145,7 +145,7 @@ textField.setEnabled(false);
 		panel.setBorder(new TitledBorder(null, "Export as a Layer of type", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel.setToolTipText("");
 		panel.setBounds(20, 217, 204, 53);
-		tabResults.add(panel);
+//		tabResults.add(panel);
 		panel.setLayout(null);
 		
 		JButton exportPointsButton = new JButton("Point");
@@ -174,8 +174,8 @@ textField.setEnabled(false);
 		});
 		panel.add(exportLinesButton);
 		
-		JButton showDetails = new JButton("Show Details");
-		showDetails.setBounds(386, 233, 89, 23);
+		JButton showDetails = new JButton("Show Details >");
+		showDetails.setBounds(370, 232, 105, 23);
 		showDetails.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				// Get the index of the selected row

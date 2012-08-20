@@ -59,9 +59,9 @@ public class Vehicles implements Tab {
 	private JComboBox comboBoxVehiclesLayer;
 	private FLyrVect selectedLayer;
 	private JComboBox comboBoxVehiclesId;
-	private ArrayList<String> idFieldValues;
+	private ArrayList<String> vehiclesIds = new ArrayList<String>();		// The list of vehicle's IDs
 	private JComboBox comboBoxVehiclesCapacities;
-	private ArrayList<Float> capacitiesFieldValues;
+	private ArrayList<Float> vehiclesCapacities = new ArrayList<Float>();	// The list of vehicle's capacities
 	
 	// The problem definition
 	private Problem problem;
@@ -188,7 +188,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesId.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					idFieldValues = getHeterogeneousVehiclesIds();
+					vehiclesIds = getHeterogeneousVehiclesIds();
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -206,7 +206,7 @@ public class Vehicles implements Tab {
 		comboBoxVehiclesCapacities.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				try {
-					capacitiesFieldValues = getHeterogeneousVehiclesCapacities();
+					vehiclesCapacities = getHeterogeneousVehiclesCapacities();
 				} catch (ReadDriverException e) {
 					controlPanel.showMessageDialog ("Error_accessing_layer_data");
 					e.printStackTrace();
@@ -699,10 +699,6 @@ public class Vehicles implements Tab {
 	private void btnNextVehiclesActionPerformed(){
 		// The number of vehicles
 		int num_vehicles;
-		// The list of vehicle's IDs
-		ArrayList<String> vehiclesIds = new ArrayList<String>();
-		// The list of vehicle's capacities
-		ArrayList<Float> vehiclesCapacities = new ArrayList<Float>();
 		
 		// 1. Get the depot's node
 		depotNumber=0;
@@ -744,14 +740,20 @@ public class Vehicles implements Tab {
 		} else {
 		// 3. If it's an heterogeneous fleet
 			
-			// 3.1 If the list of IDs is empty it's because the user didn't chose a field from the list
-			if (idFieldValues.isEmpty()){
+			// 3.1 If the user didn't chose the vehicle's layer, show alert and return
+			if (comboBoxVehiclesLayer.getSelectedIndex()==0){
+				controlPanel.showMessageDialog ("Choose_vehicles_layer");
+				return;
+			}
+			
+			// 3.2 If the list of IDs is empty it's because the user didn't chose a field from the list
+			if (vehiclesIds.isEmpty()){
 				controlPanel.showMessageDialog ("Choose_vehicles_id_field");
 				return;
 			} 
 
-			// 3.2 If the list of Capacities is empty it's because the user didn't chose a field from the list
-			if (capacitiesFieldValues.isEmpty()){
+			// 3.3 If the list of Capacities is empty it's because the user didn't chose a field from the list
+			if (vehiclesCapacities.isEmpty()){
 				controlPanel.showMessageDialog ("Choose_vehicles_capacities_field");
 				return;
 			} 

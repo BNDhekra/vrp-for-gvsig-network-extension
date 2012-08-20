@@ -59,11 +59,11 @@ public class Customers implements Tab {
 		tabCustomers.add(btnPreviousTab2);
 		
 		JLabel lblCustomersDemand = new JLabel("Customer's demand:");
-		lblCustomersDemand.setBounds(45, 12, 112, 14);
+		lblCustomersDemand.setBounds(45, 25, 112, 14);
 		tabCustomers.add(lblCustomersDemand);
 		
 		customersDemandComboBox = new JComboBox();
-		customersDemandComboBox.setBounds(167, 8, 209, 23);
+		customersDemandComboBox.setBounds(167, 21, 209, 23);
 		customersDemandComboBox.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				int selectedFieldIndex = 0;
@@ -82,77 +82,77 @@ public class Customers implements Tab {
 		JLabel lblCustomersTimeWindow = new JLabel("Customer's time window 1:");
 		lblCustomersTimeWindow.setEnabled(false);
 		lblCustomersTimeWindow.setBounds(10, 48, 147, 23);
-		tabCustomers.add(lblCustomersTimeWindow);
+//		tabCustomers.add(lblCustomersTimeWindow);
 		
 		JLabel lblCustomersTimeWindow_1 = new JLabel("Customer's time window 2:");
 		lblCustomersTimeWindow_1.setEnabled(false);
 		lblCustomersTimeWindow_1.setBounds(10, 99, 147, 23);
-		tabCustomers.add(lblCustomersTimeWindow_1);
+//		tabCustomers.add(lblCustomersTimeWindow_1);
 		
 		JLabel lblCustomersTimeWindow_2 = new JLabel("Customer's time window 3:");
 		lblCustomersTimeWindow_2.setEnabled(false);
 		lblCustomersTimeWindow_2.setBounds(10, 148, 147, 23);
-		tabCustomers.add(lblCustomersTimeWindow_2);
+//		tabCustomers.add(lblCustomersTimeWindow_2);
 		
 		JLabel lblFrom = new JLabel("From:");
 		lblFrom.setEnabled(false);
 		lblFrom.setBounds(20, 71, 46, 14);
-		tabCustomers.add(lblFrom);
+//		tabCustomers.add(lblFrom);
 		
 		JComboBox comboBox_1 = new JComboBox();
 		comboBox_1.setEnabled(false);
 		comboBox_1.setBounds(53, 68, 147, 20);
-		tabCustomers.add(comboBox_1);
+//		tabCustomers.add(comboBox_1);
 		
 		JLabel lblTo = new JLabel("To:");
 		lblTo.setEnabled(false);
 		lblTo.setBounds(230, 71, 46, 14);
-		tabCustomers.add(lblTo);
+//		tabCustomers.add(lblTo);
 		
 		JComboBox comboBox_2 = new JComboBox();
 		comboBox_2.setEnabled(false);
 		comboBox_2.setBounds(250, 68, 165, 20);
-		tabCustomers.add(comboBox_2);
+//		tabCustomers.add(comboBox_2);
 		
 		JLabel label_2 = new JLabel("From:");
 		label_2.setEnabled(false);
 		label_2.setBounds(20, 121, 46, 14);
-		tabCustomers.add(label_2);
+//		tabCustomers.add(label_2);
 		
 		JComboBox comboBox_3 = new JComboBox();
 		comboBox_3.setEnabled(false);
 		comboBox_3.setBounds(53, 118, 147, 20);
-		tabCustomers.add(comboBox_3);
+//		tabCustomers.add(comboBox_3);
 		
 		JLabel label_3 = new JLabel("To:");
 		label_3.setEnabled(false);
 		label_3.setBounds(230, 121, 46, 14);
-		tabCustomers.add(label_3);
+//		tabCustomers.add(label_3);
 		
 		JComboBox comboBox_4 = new JComboBox();
 		comboBox_4.setEnabled(false);
 		comboBox_4.setBounds(250, 118, 165, 20);
-		tabCustomers.add(comboBox_4);
+//		tabCustomers.add(comboBox_4);
 		
 		JLabel label_4 = new JLabel("From:");
 		label_4.setEnabled(false);
 		label_4.setBounds(20, 174, 46, 14);
-		tabCustomers.add(label_4);
+//		tabCustomers.add(label_4);
 		
 		JComboBox comboBox_5 = new JComboBox();
 		comboBox_5.setEnabled(false);
 		comboBox_5.setBounds(53, 171, 147, 20);
-		tabCustomers.add(comboBox_5);
+//		tabCustomers.add(comboBox_5);
 		
 		JLabel label_5 = new JLabel("To:");
 		label_5.setEnabled(false);
 		label_5.setBounds(230, 174, 46, 14);
-		tabCustomers.add(label_5);
+//		tabCustomers.add(label_5);
 		
 		JComboBox comboBox_6 = new JComboBox();
 		comboBox_6.setEnabled(false);
 		comboBox_6.setBounds(250, 171, 165, 20);
-		tabCustomers.add(comboBox_6);
+//		tabCustomers.add(comboBox_6);
 		
 	
 		return tabCustomers;
