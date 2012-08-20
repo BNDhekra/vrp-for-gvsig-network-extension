@@ -37,13 +37,12 @@ public class Layers {
 		// Iterates through every layer on the workspace and puts the ones of type POINT or MULTIPOINT on an array
 		while (it.hasNext()) {
 			FLayer lyr = it.nextLayer();
-			if (!lyr.isAvailable())
-				continue;
+			if (!lyr.isAvailable())	continue;
 			if (lyr instanceof FLyrVect) {
 				FLyrVect lyrVect = (FLyrVect) lyr;
-				if ((lyrVect.getShapeType() == FShape.POINT)
-						|| (lyrVect.getShapeType() == FShape.MULTIPOINT))
+				if ((lyrVect.getShapeType() == FShape.POINT) || (lyrVect.getShapeType() == FShape.MULTIPOINT)){
 					arrayLayers.add(lyrVect);
+				}
 			}
 		}
 		
