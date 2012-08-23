@@ -1,0 +1,15 @@
+****************************************************************************************************
+
+Name: extVRP
+
+Short Description: An extension to gvSIG to solve the Vehicle Routing Problem
+
+Authors: David Pinheiro, Francisco Peñarrubia
+
+Supporting WebSite: https://code.google.com/p/vrp-for-gvsig-network-extension/
+
+Documentation: https://vrp-for-gvsig-network-extension.googlecode.com/files/extVRP_Documentation.pdf
+
+Bug Tracking: https://code.google.com/p/vrp-for-gvsig-network-extension/issues/list
+
+****************************************************************************************************
